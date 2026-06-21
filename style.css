@@ -1,0 +1,184 @@
+:root {
+  --bg: #1b2330;
+  --panel: #232d3d;
+  --accent: #e8a33d;
+  --accent2: #4db8a4;
+  --danger: #e05a4a;
+  --text: #eef2f7;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+/* ===== マップ ===== */
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+/* ===== HUD ===== */
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  pointer-events: none;
+}
+.hud-item {
+  background: rgba(27, 35, 48, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+#map-hint {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 84px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 90%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(238, 242, 247, 0.7);
+  background: rgba(27, 35, 48, 0.6);
+  padding: 6px 12px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.panel-btn {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.panel-btn:active { transform: translateX(-50%) scale(0.96); }
+.panel-btn:disabled { opacity: 0.45; border-color: rgba(255,255,255,0.15); }
+
+/* ===== 戦闘 ===== */
+#battle {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, #3a2c34, #161b25 75%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  z-index: 20;
+}
+#battle.hidden { display: none; }
+
+#battle-monster { text-align: center; margin-top: 10px; }
+#monster-emoji { font-size: 110px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)); }
+#monster-emoji.hit { animation: shake 0.25s; }
+#monster-name { font-weight: 700; margin: 10px 0 6px; }
+#monster-telegraph {
+  margin-top: 10px;
+  color: var(--danger);
+  font-weight: 800;
+  animation: blink 0.4s infinite;
+}
+#monster-telegraph.hidden { visibility: hidden; }
+
+#battle-player { text-align: center; }
+#hunter-emoji { font-size: 60px; }
+#hunter-emoji.dodging { opacity: 0.4; transform: translateX(-40px) rotate(-15deg); }
+
+.bar {
+  width: 240px;
+  max-width: 70vw;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.bar-fill { height: 100%; transition: width 0.2s ease; }
+.bar-fill.mon { background: linear-gradient(90deg, #e05a4a, #e8a33d); }
+.bar-fill.ply { background: linear-gradient(90deg, #4db8a4, #7fe0cf); }
+
+#battle-controls { display: flex; gap: 16px; width: 100%; max-width: 420px; }
+.act-btn {
+  flex: 1;
+  border: none;
+  border-radius: 16px;
+  padding: 22px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+.act-btn.attack { background: var(--accent); color: #2a1c06; }
+.act-btn.dodge { background: var(--accent2); color: #06241f; }
+.act-btn:active { transform: scale(0.95); }
+.act-btn:disabled { opacity: 0.5; }
+
+#battle-log {
+  min-height: 20px;
+  font-size: 13px;
+  color: rgba(238, 242, 247, 0.75);
+}
+
+/* ===== トースト ===== */
+#toast {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  background: rgba(27, 35, 48, 0.95);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 18px 26px;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 30;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  animation: pop 0.3s ease;
+}
+#toast.hidden { display: none; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+@keyframes pop {
+  from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}

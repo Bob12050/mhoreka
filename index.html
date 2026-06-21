@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1b2330" />
+  <title>モホレカ - Mhoreka</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- マップ画面 -->
+    <canvas id="map"></canvas>
+
+    <!-- 上部HUD -->
+    <header id="hud">
+      <div class="hud-item">⚔️ <span id="weapon-lv">Lv.1</span></div>
+      <div class="hud-item">🪨 <span id="materials">0</span></div>
+      <div class="hud-item">❤️ <span id="player-hp-text">100/100</span></div>
+    </header>
+
+    <!-- マップ操作ヒント -->
+    <div id="map-hint">タップした方向にハンターが移動します。モンスターに近づくと戦闘開始！</div>
+
+    <!-- 強化ボタン -->
+    <button id="upgrade-btn" class="panel-btn">武器強化（🪨3）</button>
+
+    <!-- 戦闘オーバーレイ -->
+    <div id="battle" class="hidden">
+      <div id="battle-monster">
+        <div id="monster-emoji">🐉</div>
+        <div id="monster-name">大型モンスター</div>
+        <div class="bar"><div id="monster-hp" class="bar-fill mon"></div></div>
+        <div id="monster-telegraph" class="hidden">⚠️ 攻撃が来る！</div>
+      </div>
+
+      <div id="battle-player">
+        <div class="bar"><div id="battle-player-hp" class="bar-fill ply"></div></div>
+        <div id="hunter-emoji">🧍</div>
+      </div>
+
+      <div id="battle-controls">
+        <button id="dodge-btn" class="act-btn dodge">回避</button>
+        <button id="attack-btn" class="act-btn attack">攻撃</button>
+      </div>
+
+      <div id="battle-log"></div>
+    </div>
+
+    <!-- 結果トースト -->
+    <div id="toast" class="hidden"></div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
