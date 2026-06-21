@@ -55,6 +55,8 @@ html, body {
   font-weight: 700;
   backdrop-filter: blur(4px);
 }
+/* 討伐数アイコンだけは長押し操作を受け付ける */
+#kills-item { pointer-events: auto; }
 
 #map-hint {
   position: absolute;

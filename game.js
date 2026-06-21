@@ -26,7 +26,36 @@ const player = {
   atk: 14,
   weaponLevel: 1,
   materials: 0,
+  kills: 0,              // 累計討伐数
 };
+
+// ---- セーブ / ロード（localStorage に進行を保存）----
+const SAVE_KEY = "mhoreka-save-v1";
+function save() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      hp: player.hp, maxHp: player.maxHp, atk: player.atk,
+      weaponLevel: player.weaponLevel, materials: player.materials,
+      kills: player.kills,
+    }));
+  } catch (e) { /* プライベートモード等は無視 */ }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    player.maxHp = s.maxHp ?? player.maxHp;
+    player.hp = s.hp ?? player.hp;
+    player.atk = s.atk ?? player.atk;
+    player.weaponLevel = s.weaponLevel ?? player.weaponLevel;
+    player.materials = s.materials ?? player.materials;
+    player.kills = s.kills ?? player.kills;
+  } catch (e) { /* 壊れたデータは無視 */ }
+}
+function resetSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
 
 let moveTarget = null;   // {x, y} 目的地
 let monsters = [];       // マップ上のモンスター
@@ -39,6 +68,8 @@ const ctx = canvas.getContext("2d");
 const el = {
   weaponLv: document.getElementById("weapon-lv"),
   materials: document.getElementById("materials"),
+  kills: document.getElementById("kills"),
+  killsItem: document.getElementById("kills-item"),
   playerHpText: document.getElementById("player-hp-text"),
   upgradeBtn: document.getElementById("upgrade-btn"),
   battle: document.getElementById("battle"),
@@ -246,10 +277,12 @@ el.dodgeBtn.addEventListener("click", () => {
 function monsterDown() {
   endBattle();
   player.materials += battle.monster.mats;
+  player.kills++;
   // 倒したモンスターをマップから除去 → 補充
   monsters = monsters.filter((m) => m !== battle.monster);
   refillMonsters();
   updateHud();
+  save();
   showToast(`🎉 ${battle.monster.name} を討伐！\n素材 🪨 +${battle.monster.mats}`);
   battle = null;
 }
@@ -258,6 +291,7 @@ function playerDown() {
   endBattle();
   player.hp = player.maxHp; // 力尽きたら全回復してキャンプに帰還
   updateHud();
+  save();
   showToast("💤 力尽きた…\nキャンプで回復した");
   battle = null;
 }
@@ -281,6 +315,7 @@ function updateBattleBars() {
 function updateHud() {
   el.weaponLv.textContent = "Lv." + player.weaponLevel;
   el.materials.textContent = player.materials;
+  el.kills.textContent = player.kills;
   el.playerHpText.textContent = `${player.hp}/${player.maxHp}`;
   el.upgradeBtn.disabled = player.materials < upgradeCost();
   el.upgradeBtn.textContent = `武器強化（🪨${upgradeCost()}）`;
@@ -297,6 +332,7 @@ el.upgradeBtn.addEventListener("click", () => {
   player.weaponLevel++;
   player.atk += 6;
   updateHud();
+  save();
   showToast(`⚔️ 武器を強化！ 攻撃力 ${player.atk}`);
 });
 
@@ -318,8 +354,22 @@ function showToast(msg) {
 }
 
 // ---- 開始 ----
+load();          // 前回の進行を復元
 updateHud();
 requestAnimationFrame(loop);
+
+// HUDの討伐数（🏆）を長押しでセーブリセット（確認あり）
+let resetPressTimer = null;
+el.killsItem.addEventListener("pointerdown", () => {
+  resetPressTimer = setTimeout(() => {
+    if (confirm("セーブデータをリセットしますか？")) {
+      resetSave();
+      location.reload();
+    }
+  }, 1200);
+});
+el.killsItem.addEventListener("pointerup", () => clearTimeout(resetPressTimer));
+el.killsItem.addEventListener("pointerleave", () => clearTimeout(resetPressTimer));
 
 // ---- PWA: Service Worker 登録 ----
 if ("serviceWorker" in navigator) {
