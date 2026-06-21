@@ -1,5 +1,5 @@
-// シンプルなオフラインキャッシュ（PWA用）
-const CACHE = "mhoreka-v5";
+// PWAキャッシュ（ネットワーク優先＝常に最新を取りに行き、オフライン時のみキャッシュ）
+const CACHE = "mhoreka-v6";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,8 +23,16 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
+// ネットワーク優先：成功したらキャッシュも更新。失敗（オフライン）時だけキャッシュを返す
 self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then((r) => r || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
