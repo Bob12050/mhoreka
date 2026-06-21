@@ -11,13 +11,22 @@ const ENCOUNTER_DIST = 36;       // この距離まで近づくと戦闘
 const MONSTER_COUNT = 6;         // マップ上の同時出現数
 const MONSTER_SPREAD = 900;      // モンスターをばらまく範囲（プレイヤー中心）
 
+// interval=攻撃間隔(ms) / tele=回避受付の長さ(ms)。小さいほど手強い。
 const MONSTER_TYPES = [
-  { emoji: "🐗", name: "ドスイノシシ", hp: 40,  atk: 8,  mats: 2 },
-  { emoji: "🦖", name: "リオレウス",   hp: 90,  atk: 16, mats: 4 },
-  { emoji: "🐉", name: "古龍",         hp: 140, atk: 22, mats: 6 },
-  { emoji: "🦂", name: "ガミザミ",     hp: 55,  atk: 12, mats: 3 },
-  { emoji: "🦇", name: "ギエナ",       hp: 35,  atk: 10, mats: 2 },
+  { emoji: "🐗", name: "ドスイノシシ", hp: 40,  atk: 8,  mats: 2, interval: 2200, tele: 800 },
+  { emoji: "🦖", name: "リオレウス",   hp: 90,  atk: 16, mats: 4, interval: 1800, tele: 650 },
+  { emoji: "🐉", name: "古龍",         hp: 140, atk: 22, mats: 6, interval: 2000, tele: 700 },
+  { emoji: "🦂", name: "ガミザミ",     hp: 55,  atk: 12, mats: 3, interval: 1500, tele: 560 },
+  { emoji: "🦇", name: "ギエナ",       hp: 35,  atk: 10, mats: 2, interval: 1300, tele: 520 },
 ];
+
+// ---- 戦闘バランス ----
+const DODGE_INVULN = 600;   // 回避の無敵時間(ms)
+const JUST_WINDOW  = 300;   // 着弾直前これ以内に回避＝ジャスト回避
+const CRIT_MULT    = 2.5;   // 弱点ヒットの会心倍率
+const ENRAGE_HP    = 0.4;   // この割合以下で怒り状態
+const ENRAGE_SPEED = 0.6;   // 怒り時の攻撃間隔倍率（速くなる）
+const ENRAGE_DMG   = 1.4;   // 怒り時の被ダメ倍率
 
 // ---- ゲーム状態 ----
 const player = {
@@ -77,6 +86,7 @@ const el = {
   monsterName: document.getElementById("monster-name"),
   monsterHp: document.getElementById("monster-hp"),
   monsterTelegraph: document.getElementById("monster-telegraph"),
+  weakPoint: document.getElementById("weak-point"),
   battlePlayerHp: document.getElementById("battle-player-hp"),
   hunterEmoji: document.getElementById("hunter-emoji"),
   attackBtn: document.getElementById("attack-btn"),
@@ -219,60 +229,138 @@ function startBattle(monster) {
     monster,
     hp: monster.maxHp,
     dodging: false,
+    dodgePressedAt: 0,
+    weakActive: false,     // 弱点が露出中か
+    counterReady: false,   // ジャスト回避後の反撃チャンス
+    enraged: false,        // 怒り状態
     attackTimer: null,
+    telegraphTimer: null,
+    weakTimer: null,
     over: false,
   };
   el.monsterEmoji.textContent = monster.emoji;
+  el.monsterEmoji.classList.remove("enraged", "weak");
   el.monsterName.textContent = monster.name;
+  el.weakPoint.classList.add("hidden");
   el.battle.classList.remove("hidden");
-  el.battleLog.textContent = `${monster.name} が現れた！`;
+  el.battleLog.textContent = `${monster.name} が現れた！ 弱点(🎯)を狙え`;
   updateBattleBars();
   scheduleMonsterAttack();
+  scheduleWeakPoint();
 }
 
+// ---- 弱点露出のサイクル ----
+function scheduleWeakPoint() {
+  if (!battle || battle.over) return;
+  const wait = (battle.enraged ? 1400 : 2600) + Math.random() * 1500;
+  battle.weakTimer = setTimeout(() => {
+    if (!battle || battle.over) return;
+    battle.weakActive = true;
+    el.weakPoint.classList.remove("hidden");
+    el.monsterEmoji.classList.add("weak");
+    // 露出時間（怒り時は長め＝チャンス）
+    const dur = battle.enraged ? 2000 : 1500;
+    battle.weakTimer = setTimeout(() => {
+      if (!battle || battle.over) return;
+      hideWeak();
+      scheduleWeakPoint();
+    }, dur);
+  }, wait);
+}
+function hideWeak() {
+  battle.weakActive = false;
+  el.weakPoint.classList.add("hidden");
+  el.monsterEmoji.classList.remove("weak");
+}
+
+// ---- モンスターの攻撃サイクル ----
 function scheduleMonsterAttack() {
   if (!battle || battle.over) return;
-  const delay = 1600 + Math.random() * 1200;
+  let interval = battle.monster.interval + Math.random() * 600;
+  if (battle.enraged) interval *= ENRAGE_SPEED;
   battle.attackTimer = setTimeout(() => {
     if (!battle || battle.over) return;
-    // 予告
+    // 予告（この間に回避する）
     el.monsterTelegraph.classList.remove("hidden");
-    battle.attackTimer = setTimeout(() => {
+    battle.telegraphTimer = setTimeout(() => {
       if (!battle || battle.over) return;
       el.monsterTelegraph.classList.add("hidden");
-      if (battle.dodging) {
-        el.battleLog.textContent = "回避成功！";
-      } else {
-        player.hp = Math.max(0, player.hp - battle.monster.atk);
-        el.battleLog.textContent = `${battle.monster.atk} のダメージを受けた！`;
-        flash(el.monsterEmoji);
-        updateHud();
-        updateBattleBars();
-        if (player.hp <= 0) return playerDown();
-      }
+      resolveMonsterHit();
       scheduleMonsterAttack();
-    }, 650); // 回避受付ウィンドウ
-  }, delay);
+    }, battle.monster.tele);
+  }, interval);
 }
 
+function resolveMonsterHit() {
+  const sinceDodge = performance.now() - battle.dodgePressedAt;
+  if (battle.dodging && sinceDodge <= JUST_WINDOW) {
+    // ジャスト回避！ → 反撃チャンス
+    battle.counterReady = true;
+    el.battleLog.textContent = "⚡ ジャスト回避！ 反撃チャンス！";
+    flash(el.hunterEmoji, "just");
+  } else if (battle.dodging) {
+    el.battleLog.textContent = "回避成功";
+  } else {
+    let dmg = battle.monster.atk;
+    if (battle.enraged) dmg = Math.round(dmg * ENRAGE_DMG);
+    player.hp = Math.max(0, player.hp - dmg);
+    el.battleLog.textContent = `${dmg} のダメージを受けた！`;
+    flash(el.monsterEmoji);
+    updateHud();
+    updateBattleBars();
+    if (player.hp <= 0) return playerDown();
+  }
+}
+
+// ---- プレイヤーの攻撃 ----
 el.attackBtn.addEventListener("click", () => {
   if (!battle || battle.over) return;
-  battle.hp = Math.max(0, battle.hp - player.atk);
-  el.battleLog.textContent = `${player.atk} のダメージを与えた！`;
-  flash(el.monsterEmoji, "hit");
+  let dmg = player.atk;
+  let label = `${dmg} のダメージ`;
+  let crit = false;
+
+  if (battle.counterReady) {            // ジャスト回避からの反撃
+    dmg = Math.round(dmg * CRIT_MULT);
+    label = `反撃！ ${dmg} の大ダメージ！`;
+    crit = true;
+    battle.counterReady = false;
+  } else if (battle.weakActive) {       // 弱点ヒット＝会心
+    dmg = Math.round(dmg * CRIT_MULT);
+    label = `会心の一撃！ ${dmg} ダメージ！`;
+    crit = true;
+    hideWeak();
+  }
+
+  battle.hp = Math.max(0, battle.hp - dmg);
+  el.battleLog.textContent = label;
+  flash(el.monsterEmoji, crit ? "crit" : "hit");
   updateBattleBars();
+  maybeEnrage();
   if (battle.hp <= 0) monsterDown();
 });
 
+// ---- 回避 ----
 el.dodgeBtn.addEventListener("click", () => {
   if (!battle || battle.over) return;
   battle.dodging = true;
+  battle.dodgePressedAt = performance.now();
   el.hunterEmoji.classList.add("dodging");
   setTimeout(() => {
+    if (!battle) return;
     battle.dodging = false;
     el.hunterEmoji.classList.remove("dodging");
-  }, 500);
+  }, DODGE_INVULN);
 });
+
+// ---- 怒り状態への移行 ----
+function maybeEnrage() {
+  if (battle.enraged) return;
+  if (battle.hp / battle.monster.maxHp <= ENRAGE_HP && battle.hp > 0) {
+    battle.enraged = true;
+    el.monsterEmoji.classList.add("enraged");
+    showToast("🔥 怒り状態！\n攻撃が激しくなるが弱点が出やすい");
+  }
+}
 
 function monsterDown() {
   endBattle();
@@ -299,7 +387,11 @@ function playerDown() {
 function endBattle() {
   battle.over = true;
   clearTimeout(battle.attackTimer);
+  clearTimeout(battle.telegraphTimer);
+  clearTimeout(battle.weakTimer);
   el.monsterTelegraph.classList.add("hidden");
+  el.weakPoint.classList.add("hidden");
+  el.monsterEmoji.classList.remove("enraged", "weak");
   el.battle.classList.add("hidden");
   mode = "map";
 }

@@ -106,8 +106,23 @@ html, body {
 #battle.hidden { display: none; }
 
 #battle-monster { text-align: center; margin-top: 10px; }
-#monster-emoji { font-size: 110px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)); }
+#monster-emoji { font-size: 110px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)); transition: filter 0.2s; }
 #monster-emoji.hit { animation: shake 0.25s; }
+#monster-emoji.crit { animation: shake 0.3s; filter: drop-shadow(0 0 18px #e8a33d); }
+#monster-emoji.weak { filter: drop-shadow(0 0 22px #ffe06a); }
+#monster-emoji.enraged { filter: drop-shadow(0 0 20px #e05a4a) hue-rotate(-20deg); }
+
+#weak-point {
+  color: #ffe06a;
+  font-weight: 800;
+  font-size: 15px;
+  margin-top: 8px;
+  animation: pulse 0.6s infinite;
+}
+#weak-point.hidden { display: none; }
+
+#hunter-emoji.just { animation: shake 0.25s; filter: drop-shadow(0 0 16px #4db8a4); }
+
 #monster-name { font-weight: 700; margin: 10px 0 6px; }
 #monster-telegraph {
   margin-top: 10px;
@@ -180,6 +195,10 @@ html, body {
   75% { transform: translateX(10px); }
 }
 @keyframes blink { 50% { opacity: 0.3; } }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.7; }
+}
 @keyframes pop {
   from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
   to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
