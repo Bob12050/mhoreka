@@ -27,6 +27,16 @@
     <!-- 強化ボタン -->
     <button id="upgrade-btn" class="panel-btn">武器強化（🪨3）</button>
 
+    <!-- 出現中モンスター一覧 -->
+    <button id="list-toggle" class="corner-btn">📋 出現中</button>
+    <div id="monster-list" class="hidden">
+      <div class="list-head">
+        <span>出現中のモンスター</span>
+        <button id="list-close" aria-label="閉じる">✕</button>
+      </div>
+      <ul id="list-body"></ul>
+    </div>
+
     <!-- 戦闘オーバーレイ -->
     <div id="battle" class="hidden">
       <div id="battle-monster">

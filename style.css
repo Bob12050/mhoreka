@@ -91,6 +91,81 @@ html, body {
 .panel-btn:active { transform: translateX(-50%) scale(0.96); }
 .panel-btn:disabled { opacity: 0.45; border-color: rgba(255,255,255,0.15); }
 
+/* ===== 出現中モンスター一覧 ===== */
+.corner-btn {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  left: 12px;
+  background: rgba(35, 45, 61, 0.92);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.corner-btn:active { transform: scale(0.95); }
+
+#monster-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 52vh;
+  background: rgba(27, 35, 48, 0.97);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+  padding: 6px 0 calc(env(safe-area-inset-bottom) + 10px);
+  transform: translateY(0);
+  transition: transform 0.25s ease;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+}
+#monster-list.hidden { transform: translateY(105%); display: flex; }
+
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 8px;
+  font-weight: 800;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+#list-close {
+  background: none;
+  border: none;
+  color: rgba(238, 242, 247, 0.7);
+  font-size: 18px;
+  padding: 4px 8px;
+}
+
+#list-body {
+  list-style: none;
+  margin: 0;
+  padding: 6px 10px;
+  overflow-y: auto;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.list-row:active { background: rgba(232, 163, 61, 0.18); }
+.list-emoji { font-size: 30px; width: 38px; text-align: center; }
+.list-info { flex: 1; min-width: 0; }
+.list-name { font-weight: 700; font-size: 15px; }
+.list-sub { font-size: 12px; color: rgba(238, 242, 247, 0.6); }
+.list-dist { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.list-empty { text-align: center; color: rgba(238,242,247,0.5); padding: 24px; }
+
 /* ===== 戦闘 ===== */
 #battle {
   position: absolute;

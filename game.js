@@ -82,6 +82,10 @@ const el = {
   killsItem: document.getElementById("kills-item"),
   playerHpText: document.getElementById("player-hp-text"),
   upgradeBtn: document.getElementById("upgrade-btn"),
+  listToggle: document.getElementById("list-toggle"),
+  listClose: document.getElementById("list-close"),
+  monsterList: document.getElementById("monster-list"),
+  listBody: document.getElementById("list-body"),
   battle: document.getElementById("battle"),
   monsterEmoji: document.getElementById("monster-emoji"),
   monsterName: document.getElementById("monster-name"),
@@ -136,6 +140,88 @@ canvas.addEventListener("pointerdown", (e) => {
   moveTarget = screenToWorld(e.clientX, e.clientY);
 });
 
+// ---- 出現中モンスター一覧 ----
+let listOpen = false;
+let listRows = [];     // {m, distEl}
+let listAccum = 0;
+
+function distTo(m) {
+  return Math.hypot(m.x - player.x, m.y - player.y);
+}
+function strengthStars(hp) {
+  if (hp <= 40) return "★";
+  if (hp <= 60) return "★★";
+  if (hp <= 100) return "★★★";
+  return "★★★★";
+}
+
+function openList() {
+  listOpen = true;
+  el.monsterList.classList.remove("hidden");
+  renderMonsterList();
+}
+function closeList() {
+  listOpen = false;
+  el.monsterList.classList.add("hidden");
+}
+el.listToggle.addEventListener("click", () => (listOpen ? closeList() : openList()));
+el.listClose.addEventListener("click", closeList);
+
+function renderMonsterList() {
+  const sorted = monsters
+    .map((m) => ({ m, d: distTo(m) }))
+    .sort((a, b) => a.d - b.d);
+
+  el.listBody.innerHTML = "";
+  listRows = [];
+
+  if (sorted.length === 0) {
+    const li = document.createElement("li");
+    li.className = "list-empty";
+    li.textContent = "周辺にモンスターがいません";
+    el.listBody.appendChild(li);
+    return;
+  }
+
+  for (const { m, d } of sorted) {
+    const li = document.createElement("li");
+    li.className = "list-row";
+
+    const emoji = document.createElement("div");
+    emoji.className = "list-emoji";
+    emoji.textContent = m.emoji;
+
+    const info = document.createElement("div");
+    info.className = "list-info";
+    const name = document.createElement("div");
+    name.className = "list-name";
+    name.textContent = m.name;
+    const sub = document.createElement("div");
+    sub.className = "list-sub";
+    sub.textContent = "強さ " + strengthStars(m.maxHp);
+    info.append(name, sub);
+
+    const distEl = document.createElement("div");
+    distEl.className = "list-dist";
+    distEl.textContent = Math.round(d) + "m";
+
+    li.append(emoji, info, distEl);
+    li.addEventListener("click", () => {
+      moveTarget = { x: m.x, y: m.y }; // タップで自動移動
+      closeList();
+    });
+    el.listBody.appendChild(li);
+    listRows.push({ m, distEl });
+  }
+}
+
+// 距離だけを定期更新（並び替えはせず、スクロール位置を保つ）
+function updateListDistances() {
+  for (const r of listRows) {
+    r.distEl.textContent = Math.round(distTo(r.m)) + "m";
+  }
+}
+
 // ---- メインループ ----
 let lastT = performance.now();
 function loop(now) {
@@ -165,6 +251,14 @@ function updateMap(dt) {
     if (Math.hypot(m.x - player.x, m.y - player.y) < ENCOUNTER_DIST) {
       startBattle(m);
       break;
+    }
+  }
+  // 一覧を開いている間は距離をライブ更新（約0.2秒ごと）
+  if (listOpen) {
+    listAccum += dt;
+    if (listAccum > 12) {
+      listAccum = 0;
+      updateListDistances();
     }
   }
 }
@@ -226,6 +320,7 @@ function render() {
 function startBattle(monster) {
   mode = "battle";
   moveTarget = null;
+  closeList();
   battle = {
     monster,
     hp: monster.maxHp,
