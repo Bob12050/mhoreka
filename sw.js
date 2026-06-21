@@ -1,5 +1,5 @@
 // PWAキャッシュ（ネットワーク優先＝常に最新を取りに行き、オフライン時のみキャッシュ）
-const CACHE = "mhoreka-v8";
+const CACHE = "mhoreka-v9";
 const ASSETS = [
   "./",
   "./index.html",

@@ -15,8 +15,9 @@
 
     <!-- 上部HUD -->
     <header id="hud">
-      <div class="hud-item">⚔️ <span id="weapon-lv">Lv.1</span></div>
-      <div class="hud-item">🪨 <span id="materials">0</span></div>
+      <div class="hud-item">⚔️ <span id="atk-val">14</span></div>
+      <div class="hud-item">🛡️ <span id="def-val">0</span></div>
+      <div class="hud-item">🎒 <span id="materials">0</span></div>
       <div class="hud-item" id="kills-item" title="長押しでセーブをリセット">🏆 <span id="kills">0</span></div>
       <div class="hud-item">❤️ <span id="player-hp-text">100/100</span></div>
     </header>
@@ -27,8 +28,8 @@
     <!-- マップ操作ヒント -->
     <div id="map-hint">タップした方向にハンターが移動します。モンスターに近づくと戦闘開始！</div>
 
-    <!-- 強化ボタン -->
-    <button id="upgrade-btn" class="panel-btn">武器強化（🪨3）</button>
+    <!-- 装備ボタン -->
+    <button id="equip-btn" class="panel-btn">🛠️ 装備・生産</button>
 
     <!-- 出現中モンスター一覧 -->
     <button id="list-toggle" class="corner-btn">📋 出現中</button>
@@ -57,6 +58,20 @@
         <button id="area-close" aria-label="閉じる">✕</button>
       </div>
       <ul id="area-body"></ul>
+    </div>
+
+    <!-- 装備・生産 -->
+    <div id="equip" class="hidden">
+      <div class="dex-head">
+        <span>装備・生産</span>
+        <button id="equip-close" aria-label="閉じる">✕</button>
+      </div>
+      <div id="equip-tabs">
+        <button class="tab-btn active" data-tab="weapon">⚔️ 武器</button>
+        <button class="tab-btn" data-tab="armor">🛡️ 防具</button>
+        <button class="tab-btn" data-tab="mats">🎒 素材</button>
+      </div>
+      <div id="equip-body"></div>
     </div>
 
     <!-- 戦闘オーバーレイ -->
