@@ -6,10 +6,11 @@
 
 // ---- 定数 ----
 const TILE = 64;                 // マップの1マスのピクセル
-const PLAYER_SPEED = 2.2;        // 1フレームの移動量
+const PLAYER_SPEED = 3.4;        // 1フレームの移動量
 const ENCOUNTER_DIST = 36;       // この距離まで近づくと戦闘
-const MONSTER_COUNT = 6;         // マップ上の同時出現数
-const MONSTER_SPREAD = 900;      // モンスターをばらまく範囲（プレイヤー中心）
+const MONSTER_COUNT = 7;         // マップ上の同時出現数
+const MONSTER_SPREAD = 360;      // モンスターをばらまく範囲（プレイヤー中心）
+const MONSTER_MIN_DIST = 130;    // モンスターが湧く最短距離
 
 // interval=攻撃間隔(ms) / tele=回避受付の長さ(ms)。小さいほど手強い。
 const MONSTER_TYPES = [
@@ -109,7 +110,7 @@ resize();
 function spawnMonster() {
   const t = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)];
   const angle = Math.random() * Math.PI * 2;
-  const dist = 250 + Math.random() * MONSTER_SPREAD;
+  const dist = MONSTER_MIN_DIST + Math.random() * MONSTER_SPREAD;
   return {
     ...t,
     maxHp: t.hp,

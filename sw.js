@@ -1,5 +1,5 @@
 // シンプルなオフラインキャッシュ（PWA用）
-const CACHE = "mhoreka-v3";
+const CACHE = "mhoreka-v4";
 const ASSETS = [
   "./",
   "./index.html",
