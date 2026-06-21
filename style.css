@@ -106,6 +106,60 @@ html, body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 .corner-btn:active { transform: scale(0.95); }
+.corner-btn.corner-right { left: auto; right: 12px; }
+
+/* ===== 討伐図鑑 ===== */
+#dex {
+  position: absolute;
+  inset: 0;
+  background: rgba(22, 27, 37, 0.98);
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+}
+#dex.hidden { display: none; }
+
+.dex-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  font-weight: 800;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dex-head small { font-size: 13px; color: var(--accent); font-weight: 700; margin-left: 6px; }
+#dex-close {
+  background: none;
+  border: none;
+  color: rgba(238, 242, 247, 0.7);
+  font-size: 22px;
+  padding: 4px 10px;
+}
+
+#dex-body {
+  list-style: none;
+  margin: 0;
+  padding: 12px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.dex-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 10px;
+  text-align: center;
+}
+.dex-card.found { border-color: rgba(232, 163, 61, 0.5); }
+.dex-card .dex-emoji { font-size: 46px; line-height: 1.2; }
+.dex-card.unknown .dex-emoji { filter: grayscale(1) brightness(0.4); }
+.dex-card .dex-name { font-weight: 700; font-size: 14px; margin-top: 6px; }
+.dex-card .dex-meta { font-size: 12px; color: rgba(238, 242, 247, 0.6); margin-top: 4px; }
+.dex-card.found .dex-meta { color: var(--accent2); }
 
 #monster-list {
   position: absolute;

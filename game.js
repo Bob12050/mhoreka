@@ -37,6 +37,7 @@ const player = {
   weaponLevel: 1,
   materials: 0,
   kills: 0,              // 累計討伐数
+  bestiary: {},          // 種ごとの討伐数 { モンスター名: 回数 }
 };
 
 // ---- セーブ / ロード（localStorage に進行を保存）----
@@ -46,7 +47,7 @@ function save() {
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       hp: player.hp, maxHp: player.maxHp, atk: player.atk,
       weaponLevel: player.weaponLevel, materials: player.materials,
-      kills: player.kills,
+      kills: player.kills, bestiary: player.bestiary,
     }));
   } catch (e) { /* プライベートモード等は無視 */ }
 }
@@ -61,6 +62,7 @@ function load() {
     player.weaponLevel = s.weaponLevel ?? player.weaponLevel;
     player.materials = s.materials ?? player.materials;
     player.kills = s.kills ?? player.kills;
+    player.bestiary = s.bestiary ?? player.bestiary;
   } catch (e) { /* 壊れたデータは無視 */ }
 }
 function resetSave() {
@@ -86,6 +88,11 @@ const el = {
   listClose: document.getElementById("list-close"),
   monsterList: document.getElementById("monster-list"),
   listBody: document.getElementById("list-body"),
+  dexToggle: document.getElementById("dex-toggle"),
+  dexClose: document.getElementById("dex-close"),
+  dex: document.getElementById("dex"),
+  dexBody: document.getElementById("dex-body"),
+  dexRate: document.getElementById("dex-rate"),
   battle: document.getElementById("battle"),
   monsterEmoji: document.getElementById("monster-emoji"),
   monsterName: document.getElementById("monster-name"),
@@ -222,6 +229,48 @@ function updateListDistances() {
   }
 }
 
+// ---- 討伐図鑑 ----
+function openDex() {
+  renderDex();
+  el.dex.classList.remove("hidden");
+}
+function closeDex() {
+  el.dex.classList.add("hidden");
+}
+el.dexToggle.addEventListener("click", openDex);
+el.dexClose.addEventListener("click", closeDex);
+
+function renderDex() {
+  const found = MONSTER_TYPES.filter((t) => player.bestiary[t.name]).length;
+  el.dexRate.textContent = `（${found}/${MONSTER_TYPES.length}種）`;
+
+  el.dexBody.innerHTML = "";
+  for (const t of MONSTER_TYPES) {
+    const count = player.bestiary[t.name] || 0;
+    const discovered = count > 0;
+
+    const li = document.createElement("li");
+    li.className = "dex-card " + (discovered ? "found" : "unknown");
+
+    const emoji = document.createElement("div");
+    emoji.className = "dex-emoji";
+    emoji.textContent = discovered ? t.emoji : "❓";
+
+    const name = document.createElement("div");
+    name.className = "dex-name";
+    name.textContent = discovered ? t.name : "？？？";
+
+    const meta = document.createElement("div");
+    meta.className = "dex-meta";
+    meta.textContent = discovered
+      ? `討伐 ${count}　強さ ${strengthStars(t.hp)}`
+      : "未討伐";
+
+    li.append(emoji, name, meta);
+    el.dexBody.appendChild(li);
+  }
+}
+
 // ---- メインループ ----
 let lastT = performance.now();
 function loop(now) {
@@ -321,6 +370,7 @@ function startBattle(monster) {
   mode = "battle";
   moveTarget = null;
   closeList();
+  closeDex();
   battle = {
     monster,
     hp: monster.maxHp,
@@ -460,14 +510,22 @@ function maybeEnrage() {
 
 function monsterDown() {
   endBattle();
-  player.materials += battle.monster.mats;
+  const mon = battle.monster;
+  player.materials += mon.mats;
   player.kills++;
+  // 図鑑に記録（初討伐かどうか判定）
+  const firstKill = !player.bestiary[mon.name];
+  player.bestiary[mon.name] = (player.bestiary[mon.name] || 0) + 1;
   // 倒したモンスターをマップから除去 → 補充
-  monsters = monsters.filter((m) => m !== battle.monster);
+  monsters = monsters.filter((m) => m !== mon);
   refillMonsters();
   updateHud();
   save();
-  showToast(`🎉 ${battle.monster.name} を討伐！\n素材 🪨 +${battle.monster.mats}`);
+  if (firstKill) {
+    showToast(`✨ 新種発見！\n${mon.emoji} ${mon.name} を図鑑に登録`);
+  } else {
+    showToast(`🎉 ${mon.name} を討伐！\n素材 🪨 +${mon.mats}`);
+  }
   battle = null;
 }
 
