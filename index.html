@@ -21,6 +21,9 @@
       <div class="hud-item">❤️ <span id="player-hp-text">100/100</span></div>
     </header>
 
+    <!-- 現在のエリア（タップでマップ選択） -->
+    <button id="area-banner"><span id="area-emoji">🌿</span> <span id="area-name">始まりの草原</span> ▾</button>
+
     <!-- マップ操作ヒント -->
     <div id="map-hint">タップした方向にハンターが移動します。モンスターに近づくと戦闘開始！</div>
 
@@ -45,6 +48,15 @@
         <button id="dex-close" aria-label="閉じる">✕</button>
       </div>
       <ul id="dex-body"></ul>
+    </div>
+
+    <!-- マップ選択 -->
+    <div id="area-select" class="hidden">
+      <div class="dex-head">
+        <span>マップ選択</span>
+        <button id="area-close" aria-label="閉じる">✕</button>
+      </div>
+      <ul id="area-body"></ul>
     </div>
 
     <!-- 戦闘オーバーレイ -->

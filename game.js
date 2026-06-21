@@ -15,11 +15,28 @@ const MONSTER_MIN_DIST = 130;    // モンスターが湧く最短距離
 // interval=攻撃間隔(ms) / tele=回避受付の長さ(ms)。小さいほど手強い。
 const MONSTER_TYPES = [
   { emoji: "🐗", name: "ドスイノシシ", hp: 40,  atk: 8,  mats: 2, interval: 2200, tele: 800 },
-  { emoji: "🦖", name: "リオレウス",   hp: 90,  atk: 16, mats: 4, interval: 1800, tele: 650 },
-  { emoji: "🐉", name: "古龍",         hp: 140, atk: 22, mats: 6, interval: 2000, tele: 700 },
-  { emoji: "🦂", name: "ガミザミ",     hp: 55,  atk: 12, mats: 3, interval: 1500, tele: 560 },
   { emoji: "🦇", name: "ギエナ",       hp: 35,  atk: 10, mats: 2, interval: 1300, tele: 520 },
+  { emoji: "🦂", name: "ガミザミ",     hp: 55,  atk: 12, mats: 3, interval: 1500, tele: 560 },
+  { emoji: "🦅", name: "クルルヤック", hp: 70,  atk: 14, mats: 3, interval: 1600, tele: 600 },
+  { emoji: "🦖", name: "リオレウス",   hp: 90,  atk: 16, mats: 4, interval: 1800, tele: 650 },
+  { emoji: "🐊", name: "ジュラトドス", hp: 110, atk: 18, mats: 5, interval: 1900, tele: 680 },
+  { emoji: "🐉", name: "古龍",         hp: 140, atk: 22, mats: 6, interval: 2000, tele: 700 },
+  { emoji: "🐲", name: "覇龍",         hp: 200, atk: 28, mats: 8, interval: 1800, tele: 640 },
 ];
+const typeByName = (n) => MONSTER_TYPES.find((t) => t.name === n);
+
+// ---- エリア（マップ）。unlockKills 体討伐で解放 ----
+const AREAS = [
+  { id: "plain",  name: "始まりの草原", emoji: "🌿", bg: "#2f4a37", unlockKills: 0,
+    pool: ["ドスイノシシ", "ギエナ", "ガミザミ"] },
+  { id: "valley", name: "岩場の谷",     emoji: "⛰️", bg: "#4a3f2f", unlockKills: 6,
+    pool: ["ガミザミ", "クルルヤック", "リオレウス"] },
+  { id: "swamp",  name: "湿地の沼",     emoji: "🌊", bg: "#2f444a", unlockKills: 14,
+    pool: ["クルルヤック", "ジュラトドス", "リオレウス"] },
+  { id: "peak",   name: "古龍の頂",     emoji: "🌋", bg: "#3a2f4a", unlockKills: 24,
+    pool: ["ジュラトドス", "古龍", "覇龍"] },
+];
+const areaUnlocked = (a) => player.kills >= a.unlockKills;
 
 // ---- 戦闘バランス ----
 const DODGE_INVULN = 600;   // 回避の無敵時間(ms)
@@ -48,6 +65,7 @@ function save() {
       hp: player.hp, maxHp: player.maxHp, atk: player.atk,
       weaponLevel: player.weaponLevel, materials: player.materials,
       kills: player.kills, bestiary: player.bestiary,
+      area: currentArea.id,
     }));
   } catch (e) { /* プライベートモード等は無視 */ }
 }
@@ -63,6 +81,8 @@ function load() {
     player.materials = s.materials ?? player.materials;
     player.kills = s.kills ?? player.kills;
     player.bestiary = s.bestiary ?? player.bestiary;
+    const a = AREAS.find((x) => x.id === s.area);
+    if (a) currentArea = a;
   } catch (e) { /* 壊れたデータは無視 */ }
 }
 function resetSave() {
@@ -71,6 +91,7 @@ function resetSave() {
 
 let moveTarget = null;   // {x, y} 目的地
 let monsters = [];       // マップ上のモンスター
+let currentArea = AREAS[0]; // 現在のエリア
 let mode = "map";        // "map" | "battle"
 let battle = null;       // 戦闘中の状態
 
@@ -93,6 +114,12 @@ const el = {
   dex: document.getElementById("dex"),
   dexBody: document.getElementById("dex-body"),
   dexRate: document.getElementById("dex-rate"),
+  areaBanner: document.getElementById("area-banner"),
+  areaEmoji: document.getElementById("area-emoji"),
+  areaName: document.getElementById("area-name"),
+  areaSelect: document.getElementById("area-select"),
+  areaClose: document.getElementById("area-close"),
+  areaBody: document.getElementById("area-body"),
   battle: document.getElementById("battle"),
   monsterEmoji: document.getElementById("monster-emoji"),
   monsterName: document.getElementById("monster-name"),
@@ -119,7 +146,8 @@ resize();
 
 // ---- モンスター生成 ----
 function spawnMonster() {
-  const t = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)];
+  const pool = currentArea.pool;
+  const t = typeByName(pool[Math.floor(Math.random() * pool.length)]);
   const angle = Math.random() * Math.PI * 2;
   const dist = MONSTER_MIN_DIST + Math.random() * MONSTER_SPREAD;
   return {
@@ -133,7 +161,6 @@ function spawnMonster() {
 function refillMonsters() {
   while (monsters.length < MONSTER_COUNT) monsters.push(spawnMonster());
 }
-refillMonsters();
 
 // ---- 入力: タップで移動 ----
 function screenToWorld(sx, sy) {
@@ -157,9 +184,10 @@ function distTo(m) {
 }
 function strengthStars(hp) {
   if (hp <= 40) return "★";
-  if (hp <= 60) return "★★";
-  if (hp <= 100) return "★★★";
-  return "★★★★";
+  if (hp <= 70) return "★★";
+  if (hp <= 110) return "★★★";
+  if (hp <= 160) return "★★★★";
+  return "★★★★★";
 }
 
 function openList() {
@@ -271,6 +299,66 @@ function renderDex() {
   }
 }
 
+// ---- マップ選択 ----
+function openAreaSelect() {
+  renderAreaSelect();
+  el.areaSelect.classList.remove("hidden");
+}
+function closeAreaSelect() {
+  el.areaSelect.classList.add("hidden");
+}
+el.areaBanner.addEventListener("click", openAreaSelect);
+el.areaClose.addEventListener("click", closeAreaSelect);
+
+function renderAreaSelect() {
+  el.areaBody.innerHTML = "";
+  for (const a of AREAS) {
+    const unlocked = areaUnlocked(a);
+    const isCurrent = a === currentArea;
+
+    const li = document.createElement("li");
+    li.className = "area-card" + (unlocked ? "" : " locked") + (isCurrent ? " current" : "");
+
+    const emoji = document.createElement("div");
+    emoji.className = "area-emoji-lg";
+    emoji.textContent = unlocked ? a.emoji : "🔒";
+
+    const info = document.createElement("div");
+    info.className = "area-info";
+    const title = document.createElement("div");
+    title.className = "area-title";
+    title.textContent = a.name;
+    const mons = document.createElement("div");
+    mons.className = "area-mons";
+    mons.textContent = a.pool.map((n) => typeByName(n).emoji).join(" ");
+    const state = document.createElement("div");
+    state.className = "area-state";
+    state.textContent = isCurrent
+      ? "出撃中"
+      : unlocked
+      ? "タップして出撃"
+      : `討伐 ${a.unlockKills} 体で解放（あと ${a.unlockKills - player.kills} 体）`;
+    info.append(title, mons, state);
+
+    li.append(emoji, info);
+    if (unlocked && !isCurrent) {
+      li.addEventListener("click", () => travelTo(a));
+    }
+    el.areaBody.appendChild(li);
+  }
+}
+
+function travelTo(a) {
+  currentArea = a;
+  moveTarget = null;
+  monsters = [];
+  refillMonsters();
+  updateHud();
+  save();
+  closeAreaSelect();
+  showToast(`${a.emoji} ${a.name} に到着！`);
+}
+
 // ---- メインループ ----
 let lastT = performance.now();
 function loop(now) {
@@ -317,8 +405,8 @@ function render() {
   const W = window.innerWidth, H = window.innerHeight;
   const cx = W / 2, cy = H / 2;
 
-  // 背景（草原）
-  ctx.fillStyle = "#2f4a37";
+  // 背景（エリアごとの色）
+  ctx.fillStyle = currentArea.bg;
   ctx.fillRect(0, 0, W, H);
 
   // グリッド（移動感を出す）
@@ -371,6 +459,7 @@ function startBattle(monster) {
   moveTarget = null;
   closeList();
   closeDex();
+  closeAreaSelect();
   battle = {
     monster,
     hp: monster.maxHp,
@@ -521,7 +610,10 @@ function monsterDown() {
   refillMonsters();
   updateHud();
   save();
-  if (firstKill) {
+  const newArea = AREAS.find((a) => a.unlockKills === player.kills);
+  if (newArea) {
+    showToast(`🗺️ 新エリア解放！\n${newArea.emoji} ${newArea.name} へ行けるように`);
+  } else if (firstKill) {
     showToast(`✨ 新種発見！\n${mon.emoji} ${mon.name} を図鑑に登録`);
   } else {
     showToast(`🎉 ${mon.name} を討伐！\n素材 🪨 +${mon.mats}`);
@@ -565,6 +657,8 @@ function updateHud() {
   el.playerHpText.textContent = `${player.hp}/${player.maxHp}`;
   el.upgradeBtn.disabled = player.materials < upgradeCost();
   el.upgradeBtn.textContent = `武器強化（🪨${upgradeCost()}）`;
+  el.areaEmoji.textContent = currentArea.emoji;
+  el.areaName.textContent = currentArea.name;
 }
 
 function upgradeCost() {
@@ -600,7 +694,8 @@ function showToast(msg) {
 }
 
 // ---- 開始 ----
-load();          // 前回の進行を復元
+load();          // 前回の進行を復元（エリアもここで確定）
+refillMonsters();
 updateHud();
 requestAnimationFrame(loop);
 
