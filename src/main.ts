@@ -12,10 +12,19 @@ import { openAreaSelect, closeAreaSelect } from './ui/area';
 import { openEquip, closeEquip, setEquipTab } from './ui/equip';
 import { openQuests, closeQuests } from './ui/quests';
 import { playerAttack, playerDodge } from './systems/combat';
+import { isMuted, toggleMute, sfx } from './systems/audio';
 
 // ---- 画面サイズ ----
 window.addEventListener("resize", resize);
 resize();
+
+// ---- サウンド切替 ----
+el.soundToggle.textContent = isMuted() ? "🔇" : "🔊";
+el.soundToggle.addEventListener("click", () => {
+  const m = toggleMute();
+  el.soundToggle.textContent = m ? "🔇" : "🔊";
+  if (!m) sfx.ui();
+});
 
 // ---- 入力: タップで移動 ----
 canvas.addEventListener("pointerdown", (e) => {
@@ -24,24 +33,24 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 
 // ---- 出現中モンスター一覧 ----
-el.listToggle.addEventListener("click", () => (listState.open ? closeList() : openList()));
+el.listToggle.addEventListener("click", () => { sfx.ui(); listState.open ? closeList() : openList(); });
 el.listClose.addEventListener("click", closeList);
 
 // ---- 討伐図鑑 ----
-el.dexToggle.addEventListener("click", openDex);
+el.dexToggle.addEventListener("click", () => { sfx.ui(); openDex(); });
 el.dexClose.addEventListener("click", closeDex);
 
 // ---- マップ選択 ----
-el.areaBanner.addEventListener("click", openAreaSelect);
+el.areaBanner.addEventListener("click", () => { sfx.ui(); openAreaSelect(); });
 el.areaClose.addEventListener("click", closeAreaSelect);
 
 // ---- クエスト ----
-el.questToggle.addEventListener("click", openQuests);
+el.questToggle.addEventListener("click", () => { sfx.ui(); openQuests(); });
 el.questClose.addEventListener("click", closeQuests);
-el.questBanner.addEventListener("click", openQuests);
+el.questBanner.addEventListener("click", () => { sfx.ui(); openQuests(); });
 
 // ---- 装備・生産 ----
-el.equipBtn.addEventListener("click", openEquip);
+el.equipBtn.addEventListener("click", () => { sfx.ui(); openEquip(); });
 el.equipClose.addEventListener("click", closeEquip);
 document.querySelectorAll<HTMLElement>(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {

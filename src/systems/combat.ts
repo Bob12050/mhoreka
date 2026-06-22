@@ -22,6 +22,8 @@ import {
   ENRAGE_DMG,
 } from '../data/balance';
 import { refillMonsters } from './spawn';
+import { sfx } from './audio';
+import { damageNumber, shake, burst } from './fx';
 import { updateHud } from '../ui/hud';
 import { flash, showToast } from '../ui/toast';
 import { closeList } from '../ui/list';
@@ -82,6 +84,7 @@ function scheduleWeakPoint(): void {
     battle.weakActive = true;
     el.weakPoint.classList.remove("hidden");
     el.monsterEmoji.classList.add("weak");
+    sfx.weak();
     // 露出時間（怒り時は長め＝チャンス）
     const dur = battle.enraged ? 2000 : 1500;
     battle.weakTimer = setTimeout(() => {
@@ -110,6 +113,7 @@ function scheduleMonsterAttack(): void {
     if (!battle || battle.over) return;
     // 予告（この間に回避する）
     el.monsterTelegraph.classList.remove("hidden");
+    sfx.telegraph();
     battle.telegraphTimer = setTimeout(() => {
       const battle = runtime.battle;
       if (!battle || battle.over) return;
@@ -128,8 +132,10 @@ function resolveMonsterHit(): void {
     battle.counterReady = true;
     el.battleLog.textContent = "⚡ ジャスト回避！ 反撃チャンス！";
     flash(el.hunterEmoji, "just");
+    sfx.just();
   } else if (battle.dodging) {
     el.battleLog.textContent = "回避成功";
+    sfx.dodge();
   } else {
     let dmg = battle.monster.atk;
     if (battle.enraged) dmg = Math.round(dmg * ENRAGE_DMG);
@@ -139,6 +145,9 @@ function resolveMonsterHit(): void {
     player.hp = Math.max(0, player.hp - dmg);
     el.battleLog.textContent = `${dmg} のダメージを受けた！`;
     flash(el.monsterEmoji);
+    sfx.hurt();
+    damageNumber(dmg, { player: true });
+    shake(true);
     updateHud();
     updateBattleBars();
     if (player.hp <= 0) return playerDown();
@@ -177,7 +186,12 @@ export function playerAttack(): void {
 
   battle.hp = Math.max(0, battle.hp - dmg);
   el.battleLog.textContent = label;
-  flash(el.monsterEmoji, crit || e.weak ? "crit" : "hit");
+  const big = crit || e.weak;
+  flash(el.monsterEmoji, big ? "crit" : "hit");
+  damageNumber(dmg, { crit, element: e.weak });
+  burst(big);
+  shake(big);
+  if (big) sfx.crit(); else sfx.attack();
   updateBattleBars();
   maybeEnrage();
   if (battle.hp <= 0) monsterDown();
@@ -211,6 +225,7 @@ function maybeEnrage(): void {
 
 function monsterDown(): void {
   endBattle();
+  sfx.victory();
   const mon = runtime.battle!.monster;
   player.kills++;
   // 素材ドロップ（モンスター固有）
@@ -253,6 +268,7 @@ function monsterDown(): void {
 
 function playerDown(): void {
   endBattle();
+  sfx.down();
   player.hp = getMaxHp(); // 力尽きたら全回復してキャンプに帰還
   updateHud();
   save();

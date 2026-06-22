@@ -550,3 +550,101 @@ html, body {
   from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
   to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
+/* ============================================================
+   見た目の強化（サウンドボタン・ダメージ数字・シェイク・粒子）
+   ============================================================ */
+
+/* サウンド切替ボタン（右上） */
+.icon-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  right: 12px;
+  z-index: 22;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(27, 35, 48, 0.82);
+  font-size: 17px;
+  backdrop-filter: blur(4px);
+}
+.icon-btn:active { transform: scale(0.92); }
+
+/* 戦闘背景をリッチに（奥行きのある霧＋ゆらぎ） */
+#battle {
+  background:
+    radial-gradient(120% 90% at 50% 18%, rgba(232,163,61,0.10), transparent 55%),
+    radial-gradient(circle at 50% 32%, #3a2c34, #12161f 78%);
+  overflow: hidden;
+}
+#battle::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 50% 40%, rgba(224,90,74,0.12), transparent 60%);
+  animation: battleGlow 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes battleGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.08); }
+}
+/* 戦闘中の各要素は背景より前面に */
+#battle-monster, #battle-player, #battle-controls, #battle-log { position: relative; z-index: 1; }
+
+/* ダメージ数字 */
+.dmg-num {
+  position: absolute;
+  transform: translate(-50%, 0);
+  font-weight: 900;
+  font-size: 26px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 5;
+  animation: dmgFloat 0.95s ease-out forwards;
+}
+.dmg-num.crit { font-size: 40px; color: #ffd34d; text-shadow: 0 0 10px rgba(255,180,40,0.9), 0 2px 4px rgba(0,0,0,0.7); }
+.dmg-num.ele { color: #7fe0cf; }
+.dmg-num.ply { color: #ff6b5a; font-size: 24px; }
+@keyframes dmgFloat {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.6); }
+  20% { opacity: 1; transform: translate(-50%, -6px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -56px) scale(1); }
+}
+
+/* 画面シェイク */
+.shake-s { animation: shakeS 0.4s ease; }
+.shake-b { animation: shakeB 0.42s ease; }
+@keyframes shakeS {
+  0%,100% { transform: translate(0,0); }
+  25% { transform: translate(-4px, 2px); }
+  50% { transform: translate(3px, -2px); }
+  75% { transform: translate(-2px, 1px); }
+}
+@keyframes shakeB {
+  0%,100% { transform: translate(0,0); }
+  15% { transform: translate(-9px, 4px); }
+  30% { transform: translate(8px, -5px); }
+  45% { transform: translate(-7px, 3px); }
+  60% { transform: translate(6px, -3px); }
+  80% { transform: translate(-3px, 2px); }
+}
+
+/* ヒット粒子 */
+.particle {
+  position: fixed;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffce6b;
+  pointer-events: none;
+  z-index: 6;
+  animation: particleFly 0.6s ease-out forwards;
+}
+.particle.crit { width: 10px; height: 10px; background: #ff8a3d; box-shadow: 0 0 8px rgba(255,140,60,0.9); }
+@keyframes particleFly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
+}

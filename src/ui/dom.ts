@@ -48,6 +48,7 @@ export const el = {
   dodgeBtn: $("dodge-btn"),
   battleLog: $("battle-log"),
   toast: $("toast"),
+  soundToggle: $("sound-toggle"),
 };
 
 // ---- 画面サイズ ----
