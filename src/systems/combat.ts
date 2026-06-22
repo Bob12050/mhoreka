@@ -2,7 +2,7 @@ import type { Monster } from '../types';
 import { el } from '../ui/dom';
 import { player, runtime, save } from '../state';
 import { AREAS } from '../data/areas';
-import { RARE_MAT, eleIcon } from '../data/monsters';
+import { RARE_MAT, eleIcon, ENCOUNTER_DIST } from '../data/monsters';
 import { questById } from '../data/quests';
 import {
   getAtk,
@@ -267,13 +267,43 @@ function monsterDown(): void {
 }
 
 function playerDown(): void {
+  const mon = runtime.battle!.monster;
   endBattle();
   sfx.down();
-  player.hp = getMaxHp(); // 力尽きたら全回復してキャンプに帰還
+  escapeFrom(mon);           // モンスターから離れて即再戦を防ぐ
+  player.hp = getMaxHp();    // 力尽きたら全回復してキャンプに帰還
   updateHud();
   save();
   showToast("💤 力尽きた…\nキャンプで回復した");
   runtime.battle = null;
+}
+
+// ---- リタイア（戦闘から離脱）----
+export function playerRetreat(): void {
+  const battle = runtime.battle;
+  if (!battle || battle.over) return;
+  const mon = battle.monster;
+  endBattle();
+  sfx.ui();
+  escapeFrom(mon);
+  player.hp = getMaxHp();    // キャンプへ撤退して回復
+  updateHud();
+  save();
+  showToast("🏳️ 戦闘から離脱した\nキャンプで回復した");
+  runtime.battle = null;
+}
+
+// 戦ったモンスターから安全距離まで離れた位置にプレイヤーを戻す
+function escapeFrom(mon: Monster): void {
+  const dx = player.x - mon.x;
+  const dy = player.y - mon.y;
+  const d = Math.hypot(dx, dy);
+  const ux = d > 0.001 ? dx / d : 1;
+  const uy = d > 0.001 ? dy / d : 0;
+  const safe = ENCOUNTER_DIST + 120;
+  player.x = mon.x + ux * safe;
+  player.y = mon.y + uy * safe;
+  runtime.moveTarget = null;
 }
 
 function endBattle(): void {

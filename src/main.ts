@@ -11,7 +11,7 @@ import { openDex, closeDex } from './ui/dex';
 import { openAreaSelect, closeAreaSelect } from './ui/area';
 import { openEquip, closeEquip, setEquipTab } from './ui/equip';
 import { openQuests, closeQuests } from './ui/quests';
-import { playerAttack, playerDodge } from './systems/combat';
+import { playerAttack, playerDodge, playerRetreat } from './systems/combat';
 import { isMuted, toggleMute, sfx } from './systems/audio';
 
 // ---- 画面サイズ ----
@@ -64,6 +64,7 @@ document.querySelectorAll<HTMLElement>(".tab-btn").forEach((btn) => {
 // ---- 戦闘の入力 ----
 el.attackBtn.addEventListener("click", playerAttack);
 el.dodgeBtn.addEventListener("click", playerDodge);
+el.retreatBtn.addEventListener("click", playerRetreat);
 
 // ---- メインループ ----
 let lastT = performance.now();

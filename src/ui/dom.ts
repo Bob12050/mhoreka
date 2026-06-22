@@ -46,6 +46,7 @@ export const el = {
   hunterEmoji: $("hunter-emoji"),
   attackBtn: $("attack-btn"),
   dodgeBtn: $("dodge-btn"),
+  retreatBtn: $("retreat-btn"),
   battleLog: $("battle-log"),
   toast: $("toast"),
   soundToggle: $("sound-toggle"),
