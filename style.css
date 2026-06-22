@@ -179,6 +179,73 @@ html, body {
 }
 #area-banner:active { transform: translateX(-50%) scale(0.96); }
 
+#quest-banner {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 92px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(232, 163, 61, 0.92);
+  border: none;
+  color: #2a1c06;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+#quest-banner.hidden { display: none; }
+#quest-banner:active { transform: translateX(-50%) scale(0.96); }
+
+/* クエスト用の積み上げボタン（出現中ボタンの上） */
+.corner-btn.stack-left {
+  bottom: calc(env(safe-area-inset-bottom) + 64px);
+}
+
+/* ===== クエストボード ===== */
+#quests {
+  position: absolute;
+  inset: 0;
+  background: rgba(22, 27, 37, 0.98);
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+}
+#quests.hidden { display: none; }
+
+#quest-body {
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quest-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px;
+}
+.quest-card.active { border-color: var(--accent); background: rgba(232, 163, 61, 0.12); }
+.quest-top { display: flex; justify-content: space-between; align-items: baseline; }
+.quest-name { font-weight: 800; font-size: 15px; }
+.quest-clear { font-size: 12px; color: var(--accent2); font-weight: 700; }
+.quest-target { font-size: 14px; margin-top: 6px; }
+.quest-reward { font-size: 12px; color: rgba(238, 242, 247, 0.7); margin-top: 4px; }
+.quest-actions { margin-top: 10px; display: flex; align-items: center; gap: 12px; }
+.quest-prog { font-weight: 800; color: var(--accent); font-size: 14px; }
+.quest-lock { font-size: 13px; color: rgba(238, 242, 247, 0.5); }
+.quest-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.quest-btn.accept { background: var(--accent); color: #2a1c06; }
+.quest-btn.accept:disabled { background: rgba(255,255,255,0.1); color: rgba(238,242,247,0.4); }
+.quest-btn.abandon { background: rgba(224, 90, 74, 0.85); color: #fff; }
+
 #area-select {
   position: absolute;
   inset: 0;

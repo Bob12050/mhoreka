@@ -23,13 +23,26 @@
     </header>
 
     <!-- 現在のエリア（タップでマップ選択） -->
-    <button id="area-banner"><span id="area-emoji">🌿</span> <span id="area-name">始まりの草原</span> ▾</button>
+    <button id="area-banner"><span id="area-emoji">🌿</span> <span id="area-name">始まりの森</span> ▾</button>
+
+    <!-- 受注中クエスト（タップでクエストボード） -->
+    <button id="quest-banner" class="hidden"></button>
 
     <!-- マップ操作ヒント -->
     <div id="map-hint">タップした方向にハンターが移動します。モンスターに近づくと戦闘開始！</div>
 
     <!-- 装備ボタン -->
     <button id="equip-btn" class="panel-btn">🛠️ 装備・生産</button>
+
+    <!-- クエストボード -->
+    <button id="quest-toggle" class="corner-btn stack-left">📜 クエスト</button>
+    <div id="quests" class="hidden">
+      <div class="dex-head">
+        <span>クエスト</span>
+        <button id="quest-close" aria-label="閉じる">✕</button>
+      </div>
+      <div id="quest-body"></div>
+    </div>
 
     <!-- 出現中モンスター一覧 -->
     <button id="list-toggle" class="corner-btn">📋 出現中</button>

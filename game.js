@@ -94,6 +94,24 @@ const AREAS = [
     pool: ["クシャルダオラ", "古龍"] },
 ];
 const areaUnlocked = (a) => player.kills >= a.unlockKills;
+const monsterArea = (name) => AREAS.find((a) => a.pool.includes(name));
+
+// ---- クエスト（狩猟依頼）----
+// target を count 体討伐で達成。reward.mats=素材, reward.maxHp=最大HP増加（初回のみ）
+const QUESTS = [
+  { id: "q1",  name: "森の害獣駆除",   target: "ドスジャギィ",   count: 2, reward: { mats: { "ジャギィの皮": 3 } } },
+  { id: "q2",  name: "猪突猛進",       target: "ドスファンゴ",   count: 2, reward: { mats: { "ファンゴの剛牙": 3 } } },
+  { id: "q3",  name: "俊足の群れ",     target: "ドスランポス",   count: 2, reward: { mats: { "ランポスの鱗": 3 }, maxHp: 10 } },
+  { id: "q4",  name: "密林の奇怪鳥",   target: "イャンクック",   count: 1, reward: { mats: { "クックの耳殻": 3 } } },
+  { id: "q5",  name: "毒怪鳥を狩れ",   target: "ゲリョス",       count: 2, reward: { mats: { "ゲリョスの皮": 4 } } },
+  { id: "q6",  name: "黒狼鳥の脅威",   target: "イャンガルルガ", count: 1, reward: { mats: { "黒狼鳥の翼": 3 }, maxHp: 15 } },
+  { id: "q7",  name: "火山の女王",     target: "リオレイア",     count: 1, reward: { mats: { "雌火竜の鱗": 3 } } },
+  { id: "q8",  name: "火竜討伐",       target: "リオレウス",     count: 1, reward: { mats: { "火竜の鱗": 4 }, maxHp: 20 } },
+  { id: "q9",  name: "角竜の暴威",     target: "ディアブロス",   count: 1, reward: { mats: { "角竜の甲殻": 4 } } },
+  { id: "q10", name: "鋼の龍を討て",   target: "クシャルダオラ", count: 1, reward: { mats: { "鋼龍の翼": 3 }, maxHp: 25 } },
+  { id: "q11", name: "伝説の古龍",     target: "古龍",           count: 1, reward: { mats: { "古龍の血": 3 }, maxHp: 30 } },
+];
+const questById = (id) => QUESTS.find((q) => q.id === id);
 
 // ---- 戦闘バランス ----
 const DODGE_INVULN = 600;   // 回避の無敵時間(ms)
@@ -113,6 +131,9 @@ const player = {
   owned: { w_iron_sns: true }, // 生産済み装備 { id: true }
   weapon: "w_iron_sns",  // 装備中の武器
   armor: { 頭: null, 胴: null, 腕: null, 腰: null, 脚: null }, // 装備中の防具
+  questActive: null,     // 受注中クエストid
+  questProgress: 0,      // 受注中の討伐数
+  questsDone: {},        // 達成済み { id: true }
 };
 
 // ---- 装備の派生値 ----
@@ -159,6 +180,8 @@ function save() {
       kills: player.kills, bestiary: player.bestiary,
       mats: player.mats, owned: player.owned,
       weapon: player.weapon, armor: player.armor,
+      questActive: player.questActive, questProgress: player.questProgress,
+      questsDone: player.questsDone,
       area: currentArea.id,
     }));
   } catch (e) { /* プライベートモード等は無視 */ }
@@ -180,6 +203,9 @@ function load() {
     if (s.armor) for (const slot of SLOTS) {
       player.armor[slot] = armorById(s.armor[slot]) ? s.armor[slot] : null;
     }
+    player.questsDone = s.questsDone ?? player.questsDone;
+    player.questProgress = s.questProgress ?? 0;
+    if (s.questActive && questById(s.questActive)) player.questActive = s.questActive;
     const a = AREAS.find((x) => x.id === s.area);
     if (a) currentArea = a;
   } catch (e) { /* 壊れたデータは無視 */ }
@@ -223,6 +249,11 @@ const el = {
   areaSelect: document.getElementById("area-select"),
   areaClose: document.getElementById("area-close"),
   areaBody: document.getElementById("area-body"),
+  questToggle: document.getElementById("quest-toggle"),
+  questBanner: document.getElementById("quest-banner"),
+  questClose: document.getElementById("quest-close"),
+  quests: document.getElementById("quests"),
+  questBody: document.getElementById("quest-body"),
   battle: document.getElementById("battle"),
   monsterEmoji: document.getElementById("monster-emoji"),
   monsterName: document.getElementById("monster-name"),
@@ -461,6 +492,136 @@ function travelTo(a) {
   save();
   closeAreaSelect();
   showToast(`${a.emoji} ${a.name} に到着！`);
+}
+
+// ============================================================
+//  クエスト
+// ============================================================
+const questAvailable = (q) => {
+  const a = monsterArea(q.target);
+  return a && areaUnlocked(a);
+};
+
+function completeQuest(q) {
+  let rewardTxt = "";
+  if (q.reward.mats) {
+    for (const m in q.reward.mats) player.mats[m] = (player.mats[m] || 0) + q.reward.mats[m];
+    rewardTxt = Object.entries(q.reward.mats).map(([m, n]) => `${m}×${n}`).join("　");
+  }
+  let hpTxt = "";
+  if (q.reward.maxHp && !player.questsDone[q.id]) {
+    player.maxHp += q.reward.maxHp;
+    player.hp = player.maxHp;
+    hpTxt = `\n最大HP +${q.reward.maxHp}！`;
+  }
+  player.questsDone[q.id] = true;
+  player.questActive = null;
+  player.questProgress = 0;
+  return `📜 クエスト達成！「${q.name}」\n報酬 ${rewardTxt}${hpTxt}`;
+}
+
+function acceptQuest(q) {
+  player.questActive = q.id;
+  player.questProgress = 0;
+  updateHud();
+  save();
+  renderQuests();
+  closeQuests();
+  showToast(`📜 クエストを受注\n「${q.name}」`);
+}
+function abandonQuest() {
+  player.questActive = null;
+  player.questProgress = 0;
+  updateHud();
+  save();
+  renderQuests();
+}
+
+function openQuests() {
+  renderQuests();
+  el.quests.classList.remove("hidden");
+}
+function closeQuests() {
+  el.quests.classList.add("hidden");
+}
+el.questToggle.addEventListener("click", openQuests);
+el.questClose.addEventListener("click", closeQuests);
+el.questBanner.addEventListener("click", openQuests);
+
+function rewardText(q) {
+  const parts = [];
+  if (q.reward.mats) for (const m in q.reward.mats) parts.push(`${m}×${q.reward.mats[m]}`);
+  if (q.reward.maxHp) parts.push(`最大HP+${q.reward.maxHp}`);
+  return parts.join("　");
+}
+
+function renderQuests() {
+  el.questBody.innerHTML = "";
+  for (const q of QUESTS) {
+    const t = typeByName(q.target);
+    const isActive = player.questActive === q.id;
+    const avail = questAvailable(q);
+    const done = !!player.questsDone[q.id];
+
+    const card = document.createElement("div");
+    card.className = "quest-card" + (isActive ? " active" : "");
+
+    const top = document.createElement("div");
+    top.className = "quest-top";
+    top.innerHTML =
+      `<span class="quest-name">${q.name}</span>` +
+      (done ? `<span class="quest-clear">✓クリア済</span>` : "");
+    card.appendChild(top);
+
+    const tgt = document.createElement("div");
+    tgt.className = "quest-target";
+    tgt.textContent = `${t.emoji} ${q.target} を ${q.count}頭討伐`;
+    card.appendChild(tgt);
+
+    const rew = document.createElement("div");
+    rew.className = "quest-reward";
+    rew.textContent = "報酬: " + rewardText(q);
+    card.appendChild(rew);
+
+    const actions = document.createElement("div");
+    actions.className = "quest-actions";
+    if (isActive) {
+      const prog = document.createElement("span");
+      prog.className = "quest-prog";
+      prog.textContent = `進行中 ${player.questProgress}/${q.count}`;
+      const ab = document.createElement("button");
+      ab.className = "quest-btn abandon";
+      ab.textContent = "やめる";
+      ab.addEventListener("click", abandonQuest);
+      actions.append(prog, ab);
+    } else if (!avail) {
+      const lock = document.createElement("span");
+      lock.className = "quest-lock";
+      lock.textContent = "🔒 エリア未解放";
+      actions.appendChild(lock);
+    } else {
+      const b = document.createElement("button");
+      b.className = "quest-btn accept";
+      b.textContent = "受注する";
+      b.disabled = !!player.questActive;
+      if (player.questActive) b.textContent = "他を受注中";
+      b.addEventListener("click", () => acceptQuest(q));
+      actions.appendChild(b);
+    }
+    card.appendChild(actions);
+    el.questBody.appendChild(card);
+  }
+}
+
+function updateQuestBanner() {
+  if (player.questActive) {
+    const q = questById(player.questActive);
+    const t = typeByName(q.target);
+    el.questBanner.textContent = `📜 ${t.emoji}${q.target} ${player.questProgress}/${q.count}`;
+    el.questBanner.classList.remove("hidden");
+  } else {
+    el.questBanner.classList.add("hidden");
+  }
 }
 
 // ============================================================
@@ -715,6 +876,7 @@ function startBattle(monster) {
   closeDex();
   closeAreaSelect();
   closeEquip();
+  closeQuests();
   battle = {
     monster,
     hp: monster.maxHp,
@@ -873,13 +1035,26 @@ function monsterDown() {
   // 図鑑に記録（初討伐かどうか判定）
   const firstKill = !player.bestiary[mon.name];
   player.bestiary[mon.name] = (player.bestiary[mon.name] || 0) + 1;
+  // クエスト進行
+  let questMsg = null;
+  if (player.questActive) {
+    const q = questById(player.questActive);
+    if (q && q.target === mon.name) {
+      player.questProgress++;
+      if (player.questProgress >= q.count) {
+        questMsg = completeQuest(q);
+      }
+    }
+  }
   // 倒したモンスターをマップから除去 → 補充
   monsters = monsters.filter((m) => m !== mon);
   refillMonsters();
   updateHud();
   save();
   const newArea = AREAS.find((a) => a.unlockKills === player.kills);
-  if (newArea) {
+  if (questMsg) {
+    showToast(questMsg);
+  } else if (newArea) {
     showToast(`🗺️ 新エリア解放！\n${newArea.emoji} ${newArea.name} へ行けるように`);
   } else if (firstKill) {
     showToast(`✨ 新種発見！\n${mon.emoji} ${mon.name} を図鑑に登録`);
@@ -926,6 +1101,7 @@ function updateHud() {
   el.playerHpText.textContent = `${player.hp}/${player.maxHp}`;
   el.areaEmoji.textContent = currentArea.emoji;
   el.areaName.textContent = currentArea.name;
+  updateQuestBanner();
 }
 
 // ---- 演出ヘルパ ----
