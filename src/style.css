@@ -468,6 +468,8 @@ html, body {
 
 #battle-monster { text-align: center; margin-top: 10px; }
 #monster-emoji { font-size: 110px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)); transition: filter 0.2s; }
+#monster-emoji.has-art { width: 160px; height: 160px; margin: 0 auto; background-size: contain; background-repeat: no-repeat; background-position: center; }
+#hunter-emoji.has-art { width: 96px; height: 96px; margin: 0 auto; background-size: contain; background-repeat: no-repeat; background-position: center; }
 #monster-emoji.hit { animation: shake 0.25s; }
 #monster-emoji.crit { animation: shake 0.3s; filter: drop-shadow(0 0 18px #e8a33d); }
 #monster-emoji.weak { filter: drop-shadow(0 0 22px #ffe06a); }

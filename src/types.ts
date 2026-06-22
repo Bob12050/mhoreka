@@ -17,6 +17,7 @@ export interface MonsterType {
   material: string;
   weak: EleKey;
   resist?: EleKey;
+  art?: string; // public/img/monsters/<art>.png（無ければ絵文字）
   // 亜種で付与
   variant?: boolean;
   baseName?: string;

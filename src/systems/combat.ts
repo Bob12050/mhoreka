@@ -24,6 +24,7 @@ import {
 import { refillMonsters } from './spawn';
 import { sfx } from './audio';
 import { damageNumber, shake, burst } from './fx';
+import { applyArt, monsterArtUrl, HUNTER_ART } from './assets';
 import { updateHud } from '../ui/hud';
 import { flash, showToast } from '../ui/toast';
 import { closeList } from '../ui/list';
@@ -59,7 +60,8 @@ export function startBattle(monster: Monster): void {
     weakTimer: null,
     over: false,
   };
-  el.monsterEmoji.textContent = monster.emoji;
+  applyArt(el.monsterEmoji, monsterArtUrl(monster.art), monster.emoji);
+  applyArt(el.hunterEmoji, HUNTER_ART, "🧍");
   el.monsterEmoji.classList.remove("enraged", "weak");
   el.monsterName.textContent = monster.name;
   el.monsterWeak.textContent =

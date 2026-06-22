@@ -1,6 +1,7 @@
 import { ctx } from './ui/dom';
 import { player, runtime } from './state';
 import { TILE, ENCOUNTER_DIST } from './data/monsters';
+import { getImage, monsterArtUrl, HUNTER_ART } from './systems/assets';
 
 // ============================================================
 //  マップ描画（エリアごとの雰囲気・地形・環境パーティクル・霧）
@@ -159,8 +160,13 @@ export function render(): void {
       ? "rgba(255,210,80,0.8)"
       : near ? "rgba(255,90,70,0.85)" : "rgba(224,90,74,0.28)";
     ctx.beginPath(); ctx.arc(mx, my, pulse, 0, Math.PI * 2); ctx.stroke();
-    ctx.font = "40px serif";
-    ctx.fillText(m.emoji, mx, my);
+    const mimg = getImage(monsterArtUrl(m.art));
+    if (mimg) {
+      ctx.drawImage(mimg, mx - 26, my - 26, 52, 52);
+    } else {
+      ctx.font = "40px serif";
+      ctx.fillText(m.emoji, mx, my);
+    }
     if (m.variant) { ctx.font = "20px serif"; ctx.fillText("✨", mx + 22, my - 20); }
   }
 
@@ -184,9 +190,14 @@ export function render(): void {
   ctx.beginPath();
   ctx.arc(hx, hy, 4, 0, Math.PI * 2);
   ctx.fill();
-  // 本体
-  ctx.font = "42px serif";
-  ctx.fillText("🧭", cx, cy);
+  // 本体（ハンター画像があれば使用）
+  const himg = getImage(HUNTER_ART);
+  if (himg) {
+    ctx.drawImage(himg, cx - 26, cy - 30, 52, 52);
+  } else {
+    ctx.font = "42px serif";
+    ctx.fillText("🧭", cx, cy);
+  }
 
   // ―― 環境パーティクル（前景）――
   drawParticles(theme.particle, W, H, now);

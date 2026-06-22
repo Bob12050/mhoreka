@@ -12,23 +12,23 @@ export const MONSTER_MIN_DIST = 130; // モンスターが湧く最短距離
 // material=ドロップ素材名 / mats=ドロップ個数 / weak=弱点属性 / resist=耐性属性
 export const MONSTER_TYPES: MonsterType[] = [
   // ―― 序盤（始まりの森） ――
-  { emoji: "🦎", name: "ドスジャギィ",   hp: 420,  atk: 30, mats: 2, interval: 2100, tele: 780, material: "ジャギィの皮",   weak: "火" },
-  { emoji: "🐗", name: "ドスファンゴ",   hp: 500,  atk: 34, mats: 2, interval: 1900, tele: 720, material: "ファンゴの剛牙", weak: "火" },
-  { emoji: "🦕", name: "ドスランポス",   hp: 560,  atk: 38, mats: 3, interval: 1500, tele: 560, material: "ランポスの鱗",   weak: "雷" },
+  { emoji: "🦎", name: "ドスジャギィ",   hp: 420,  atk: 30, mats: 2, interval: 2100, tele: 780, material: "ジャギィの皮",   weak: "火", art: "jaggi" },
+  { emoji: "🐗", name: "ドスファンゴ",   hp: 500,  atk: 34, mats: 2, interval: 1900, tele: 720, material: "ファンゴの剛牙", weak: "火", art: "fango" },
+  { emoji: "🦕", name: "ドスランポス",   hp: 560,  atk: 38, mats: 3, interval: 1500, tele: 560, material: "ランポスの鱗",   weak: "雷", art: "rampos" },
   // ―― 中盤（旧ジャングル） ――
-  { emoji: "🦤", name: "イャンクック",   hp: 780,  atk: 40, mats: 3, interval: 1700, tele: 640, material: "クックの耳殻",   weak: "水" },
-  { emoji: "🦩", name: "ゲリョス",       hp: 900,  atk: 44, mats: 3, interval: 1600, tele: 600, material: "ゲリョスの皮",   weak: "火" },
-  { emoji: "🦅", name: "イャンガルルガ", hp: 1050, atk: 50, mats: 4, interval: 1500, tele: 560, material: "黒狼鳥の翼",     weak: "雷", resist: "火" },
+  { emoji: "🦤", name: "イャンクック",   hp: 780,  atk: 40, mats: 3, interval: 1700, tele: 640, material: "クックの耳殻",   weak: "水", art: "kut" },
+  { emoji: "🦩", name: "ゲリョス",       hp: 900,  atk: 44, mats: 3, interval: 1600, tele: 600, material: "ゲリョスの皮",   weak: "火", art: "geryos" },
+  { emoji: "🦅", name: "イャンガルルガ", hp: 1050, atk: 50, mats: 4, interval: 1500, tele: 560, material: "黒狼鳥の翼",     weak: "雷", resist: "火", art: "garuga" },
   // ―― 終盤（火山帯） ――
-  { emoji: "🐉", name: "リオレイア",     hp: 1200, atk: 56, mats: 4, interval: 1900, tele: 680, material: "雌火竜の鱗",     weak: "龍", resist: "火" },
-  { emoji: "🦖", name: "リオレウス",     hp: 1400, atk: 62, mats: 5, interval: 1800, tele: 650, material: "火竜の鱗",       weak: "龍", resist: "火" },
-  { emoji: "🐃", name: "ディアブロス",   hp: 1650, atk: 70, mats: 5, interval: 2000, tele: 700, material: "角竜の甲殻",     weak: "水", resist: "火" },
+  { emoji: "🐉", name: "リオレイア",     hp: 1200, atk: 56, mats: 4, interval: 1900, tele: 680, material: "雌火竜の鱗",     weak: "龍", resist: "火", art: "rathian" },
+  { emoji: "🦖", name: "リオレウス",     hp: 1400, atk: 62, mats: 5, interval: 1800, tele: 650, material: "火竜の鱗",       weak: "龍", resist: "火", art: "rathalos" },
+  { emoji: "🐃", name: "ディアブロス",   hp: 1650, atk: 70, mats: 5, interval: 2000, tele: 700, material: "角竜の甲殻",     weak: "水", resist: "火", art: "diablos" },
   // ―― 最終（龍ノ頂） ――
-  { emoji: "🌪️", name: "クシャルダオラ", hp: 2200, atk: 76, mats: 6, interval: 1700, tele: 620, material: "鋼龍の翼",       weak: "雷", resist: "龍" },
-  { emoji: "🐲", name: "古龍",           hp: 3400, atk: 90, mats: 8, interval: 1900, tele: 640, material: "古龍の血",       weak: "龍", resist: "火" },
+  { emoji: "🌪️", name: "クシャルダオラ", hp: 2200, atk: 76, mats: 6, interval: 1700, tele: 620, material: "鋼龍の翼",       weak: "雷", resist: "龍", art: "kushala" },
+  { emoji: "🐲", name: "古龍",           hp: 3400, atk: 90, mats: 8, interval: 1900, tele: 640, material: "古龍の血",       weak: "龍", resist: "火", art: "koryu" },
   // ―― 極限（獄炎の溶岩洞） ――
-  { emoji: "🔥", name: "テオ・テスカトル", hp: 3800, atk: 95,  mats: 8, interval: 1800, tele: 620, material: "炎王龍の鬣", weak: "水", resist: "火" },
-  { emoji: "🦔", name: "ネルギガンテ",     hp: 4400, atk: 105, mats: 9, interval: 1700, tele: 600, material: "滅尽龍の角", weak: "龍" },
+  { emoji: "🔥", name: "テオ・テスカトル", hp: 3800, atk: 95,  mats: 8, interval: 1800, tele: 620, material: "炎王龍の鬣", weak: "水", resist: "火", art: "teostra" },
+  { emoji: "🦔", name: "ネルギガンテ",     hp: 4400, atk: 105, mats: 9, interval: 1700, tele: 600, material: "滅尽龍の角", weak: "龍", art: "nergigante" },
 ];
 export const typeByName = (n: string): MonsterType | undefined =>
   MONSTER_TYPES.find((t) => t.name === n);
