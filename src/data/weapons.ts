@@ -18,6 +18,13 @@ export const WEAPONS: Weapon[] = [
   { id: "w_elder_hammer",name:"古龍棍",       type: "ハンマー",atk: 70, ele: 24, element: "龍", cost: { "古龍の血": 2, "鋼龍の翼": 3 } },
   // 最上位（亜種のレア素材が必要）
   { id: "w_relic_db",   name: "覇玉の双剣",   type: "双剣",   atk: 82, ele: 28, element: "龍", cost: { "竜の宝玉": 3, "古龍の血": 2 } },
+  // 覇玉シリーズ（属性違い・亜種狩り用／竜の宝玉が必要）
+  { id: "w_relic_ls",   name: "覇玉の太刀",   type: "太刀",   atk: 78, ele: 30, element: "火", cost: { "竜の宝玉": 2, "火竜の鱗": 4 } },
+  { id: "w_relic_bow",  name: "覇玉の弓",     type: "弓",     atk: 74, ele: 34, element: "水", cost: { "竜の宝玉": 2, "角竜の甲殻": 4 } },
+  { id: "w_relic_hammer",name:"覇玉の鎚",     type: "ハンマー",atk: 84, ele: 30, element: "雷", cost: { "竜の宝玉": 2, "鋼龍の翼": 4 } },
+  // 獄炎の溶岩洞の素材で作る最終武器
+  { id: "w_teostra_gs", name: "炎王剣",       type: "大剣",   atk: 90, ele: 34, element: "火", cost: { "炎王龍の鬣": 3, "竜の宝玉": 2 } },
+  { id: "w_nerg_ls",    name: "滅尽の太刀",   type: "太刀",   atk: 96, ele: 32, element: "龍", cost: { "滅尽龍の角": 3, "竜の宝玉": 2 } },
 ];
 
 export const weaponById = (id: string): Weapon | undefined =>

@@ -26,6 +26,9 @@ export const MONSTER_TYPES: MonsterType[] = [
   // ―― 最終（龍ノ頂） ――
   { emoji: "🌪️", name: "クシャルダオラ", hp: 2200, atk: 76, mats: 6, interval: 1700, tele: 620, material: "鋼龍の翼",       weak: "雷", resist: "龍" },
   { emoji: "🐲", name: "古龍",           hp: 3400, atk: 90, mats: 8, interval: 1900, tele: 640, material: "古龍の血",       weak: "龍", resist: "火" },
+  // ―― 極限（獄炎の溶岩洞） ――
+  { emoji: "🔥", name: "テオ・テスカトル", hp: 3800, atk: 95,  mats: 8, interval: 1800, tele: 620, material: "炎王龍の鬣", weak: "水", resist: "火" },
+  { emoji: "🦔", name: "ネルギガンテ",     hp: 4400, atk: 105, mats: 9, interval: 1700, tele: 600, material: "滅尽龍の角", weak: "龍" },
 ];
 export const typeByName = (n: string): MonsterType | undefined =>
   MONSTER_TYPES.find((t) => t.name === n);

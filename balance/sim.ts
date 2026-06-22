@@ -48,6 +48,7 @@ const STAGE_BUILD: Record<string, Build> = {
   jungle:  { name: "中盤装備",   w: "w_garuga_bow",   a: KUT },
   volcano: { name: "終盤装備",   w: "w_rath_ls",      a: RATH },
   summit:  { name: "龍ノ頂装備", w: "w_elder_hammer", a: RATH },
+  lava:    { name: "最上位装備", w: "w_nerg_ls",      a: RELIC_MIX },
 };
 const ENDGAME_BUILD: Build = { name: "最上位装備", w: "w_relic_db", a: RELIC_MIX };
 

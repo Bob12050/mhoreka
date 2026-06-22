@@ -18,6 +18,9 @@ export const QUESTS: Quest[] = [
   // 亜種クエスト（レア素材が狙える）
   { id: "qv1", name: "蒼炎の悪魔",     target: "リオレウス亜種", count: 1, reward: { mats: { "竜の宝玉": 1 } } },
   { id: "qv2", name: "黒き宝玉",       target: "古龍亜種",       count: 1, reward: { mats: { "竜の宝玉": 2 }, maxHp: 30 } },
+  // 獄炎の溶岩洞
+  { id: "q12", name: "炎王龍の狩猟",   target: "テオ・テスカトル", count: 1, reward: { mats: { "炎王龍の鬣": 3 }, maxHp: 30 } },
+  { id: "q13", name: "滅びを招く龍",   target: "ネルギガンテ",     count: 1, reward: { mats: { "滅尽龍の角": 3 }, maxHp: 35 } },
 ];
 
 export const questById = (id: string | null): Quest | undefined =>

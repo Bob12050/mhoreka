@@ -11,6 +11,8 @@ export const AREAS: Area[] = [
     pool: ["リオレイア", "リオレウス", "ディアブロス"] },
   { id: "summit", name: "龍ノ頂",       emoji: "❄️", bg: "#2f3a4a", unlockKills: 32,
     pool: ["クシャルダオラ", "古龍"] },
+  { id: "lava",   name: "獄炎の溶岩洞", emoji: "🔥", bg: "#2a1518", unlockKills: 44,
+    pool: ["テオ・テスカトル", "ネルギガンテ"] },
 ];
 
 export const areaUnlocked = (a: Area): boolean => player.kills >= a.unlockKills;
