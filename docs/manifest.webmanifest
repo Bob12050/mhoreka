@@ -1,0 +1,1 @@
+{"name":"モホレカ - Mhoreka","short_name":"モホレカ","description":"スマホで手軽に遊べるモンハンNow風の位置ゲーム（GPS不要のゲーム内マップ版）","start_url":"./index.html","display":"standalone","background_color":"#1b2330","theme_color":"#1b2330","lang":"en","scope":"/mhoreka/","orientation":"portrait","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
