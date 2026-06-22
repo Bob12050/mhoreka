@@ -79,29 +79,37 @@ const WEAPONS = [
   { id: "w_relic_db",   name: "覇玉の双剣",   type: "双剣",   atk: 82, ele: 28, element: "龍", cost: { "竜の宝玉": 3, "古龍の血": 2 } },
 ];
 const SLOTS = ["頭", "胴", "腕", "腰", "脚"];
+// 防具スキル: per=1Lvに必要なポイント / max=最大Lv / val=Lvあたりの効果量
+const SKILLS = {
+  "攻撃":     { max: 5, per: 2, val: (l) => l * 3,  desc: (l) => `攻撃力 +${l * 3}` },
+  "防御":     { max: 5, per: 2, val: (l) => l * 5,  desc: (l) => `防御力 +${l * 5}` },
+  "体力増強": { max: 5, per: 2, val: (l) => l * 15, desc: (l) => `最大HP +${l * 15}` },
+  "会心":     { max: 3, per: 3, val: (l) => l * 15, desc: (l) => `会心率 +${l * 15}%` },
+  "回避性能": { max: 3, per: 3, val: (l) => l * 60, desc: (l) => `ジャスト回避猶予 +${l * 60}ms` },
+};
 const ARMORS = [
   // レザー装備（序盤・始まりの森）
-  { id: "a_leather_head", name: "レザーヘルム",  slot: "頭", def: 2, cost: { "ジャギィの皮": 2 } },
-  { id: "a_leather_body", name: "レザーメイル",  slot: "胴", def: 3, cost: { "ジャギィの皮": 3 } },
-  { id: "a_leather_arm",  name: "レザーアーム",  slot: "腕", def: 2, cost: { "ファンゴの剛牙": 2 } },
-  { id: "a_leather_waist",name: "レザーコイル",  slot: "腰", def: 2, cost: { "ファンゴの剛牙": 2 } },
-  { id: "a_leather_leg",  name: "レザーグリーヴ", slot: "脚", def: 2, cost: { "ランポスの鱗": 2 } },
+  { id: "a_leather_head", name: "レザーヘルム",  slot: "頭", def: 2, skills: { "体力増強": 1 }, cost: { "ジャギィの皮": 2 } },
+  { id: "a_leather_body", name: "レザーメイル",  slot: "胴", def: 3, skills: { "防御": 2 },     cost: { "ジャギィの皮": 3 } },
+  { id: "a_leather_arm",  name: "レザーアーム",  slot: "腕", def: 2, skills: { "攻撃": 1 },     cost: { "ファンゴの剛牙": 2 } },
+  { id: "a_leather_waist",name: "レザーコイル",  slot: "腰", def: 2, skills: { "体力増強": 1 }, cost: { "ファンゴの剛牙": 2 } },
+  { id: "a_leather_leg",  name: "レザーグリーヴ", slot: "脚", def: 2, skills: { "回避性能": 1 }, cost: { "ランポスの鱗": 2 } },
   // クック装備（中盤・旧ジャングル）
-  { id: "a_kut_head", name: "クック【兜】", slot: "頭", def: 5, cost: { "クックの耳殻": 3, "ゲリョスの皮": 1 } },
-  { id: "a_kut_body", name: "クック【鎧】", slot: "胴", def: 6, cost: { "クックの耳殻": 4, "ゲリョスの皮": 2 } },
-  { id: "a_kut_arm",  name: "クック【腕】", slot: "腕", def: 5, cost: { "ゲリョスの皮": 3 } },
-  { id: "a_kut_waist",name: "クック【帯】", slot: "腰", def: 5, cost: { "黒狼鳥の翼": 2 } },
-  { id: "a_kut_leg",  name: "クック【脚】", slot: "脚", def: 5, cost: { "黒狼鳥の翼": 2, "クックの耳殻": 1 } },
-  // 火竜装備（終盤・火山帯）
-  { id: "a_rath_head", name: "リオソウル【兜】", slot: "頭", def: 8, cost: { "火竜の鱗": 3, "雌火竜の鱗": 1 } },
-  { id: "a_rath_body", name: "リオソウル【鎧】", slot: "胴", def: 9, cost: { "火竜の鱗": 4, "角竜の甲殻": 2 } },
-  { id: "a_rath_arm",  name: "リオソウル【腕】", slot: "腕", def: 8, cost: { "火竜の鱗": 3 } },
-  { id: "a_rath_waist",name: "リオソウル【帯】", slot: "腰", def: 8, cost: { "角竜の甲殻": 3 } },
-  { id: "a_rath_leg",  name: "リオソウル【脚】", slot: "脚", def: 8, cost: { "火竜の鱗": 3, "角竜の甲殻": 1 } },
+  { id: "a_kut_head", name: "クック【兜】", slot: "頭", def: 5, skills: { "攻撃": 2 },     cost: { "クックの耳殻": 3, "ゲリョスの皮": 1 } },
+  { id: "a_kut_body", name: "クック【鎧】", slot: "胴", def: 6, skills: { "体力増強": 2 }, cost: { "クックの耳殻": 4, "ゲリョスの皮": 2 } },
+  { id: "a_kut_arm",  name: "クック【腕】", slot: "腕", def: 5, skills: { "攻撃": 2 },     cost: { "ゲリョスの皮": 3 } },
+  { id: "a_kut_waist",name: "クック【帯】", slot: "腰", def: 5, skills: { "回避性能": 2 }, cost: { "黒狼鳥の翼": 2 } },
+  { id: "a_kut_leg",  name: "クック【脚】", slot: "脚", def: 5, skills: { "会心": 2 },     cost: { "黒狼鳥の翼": 2, "クックの耳殻": 1 } },
+  // 火竜装備（終盤・火山帯）攻撃寄り
+  { id: "a_rath_head", name: "リオソウル【兜】", slot: "頭", def: 8, skills: { "攻撃": 3 },     cost: { "火竜の鱗": 3, "雌火竜の鱗": 1 } },
+  { id: "a_rath_body", name: "リオソウル【鎧】", slot: "胴", def: 9, skills: { "攻撃": 3 },     cost: { "火竜の鱗": 4, "角竜の甲殻": 2 } },
+  { id: "a_rath_arm",  name: "リオソウル【腕】", slot: "腕", def: 8, skills: { "会心": 2 },     cost: { "火竜の鱗": 3 } },
+  { id: "a_rath_waist",name: "リオソウル【帯】", slot: "腰", def: 8, skills: { "体力増強": 2 }, cost: { "角竜の甲殻": 3 } },
+  { id: "a_rath_leg",  name: "リオソウル【脚】", slot: "脚", def: 8, skills: { "攻撃": 2 },     cost: { "火竜の鱗": 3, "角竜の甲殻": 1 } },
   // 覇玉装備（最上位・亜種のレア素材が必要）
-  { id: "a_relic_head", name: "覇玉ノ兜", slot: "頭", def: 12, cost: { "竜の宝玉": 2 } },
-  { id: "a_relic_body", name: "覇玉ノ鎧", slot: "胴", def: 14, cost: { "竜の宝玉": 2, "古龍の血": 2 } },
-  { id: "a_relic_leg",  name: "覇玉ノ脚", slot: "脚", def: 12, cost: { "竜の宝玉": 2 } },
+  { id: "a_relic_head", name: "覇玉ノ兜", slot: "頭", def: 12, skills: { "会心": 3 }, cost: { "竜の宝玉": 2 } },
+  { id: "a_relic_body", name: "覇玉ノ鎧", slot: "胴", def: 14, skills: { "攻撃": 4 }, cost: { "竜の宝玉": 2, "古龍の血": 2 } },
+  { id: "a_relic_leg",  name: "覇玉ノ脚", slot: "脚", def: 12, skills: { "回避性能": 3 }, cost: { "竜の宝玉": 2 } },
 ];
 const weaponById = (id) => WEAPONS.find((w) => w.id === id);
 const armorById = (id) => ARMORS.find((a) => a.id === id);
@@ -166,9 +174,35 @@ const player = {
   questsDone: {},        // 達成済み { id: true }
 };
 
-// ---- 装備の派生値 ----
+// ---- 防具スキル ----
+function skillPoints() {
+  const pts = {};
+  for (const slot of SLOTS) {
+    const a = armorById(player.armor[slot]);
+    if (a && a.skills) for (const s in a.skills) pts[s] = (pts[s] || 0) + a.skills[s];
+  }
+  return pts;
+}
+function skillLevel(name, pts) {
+  pts = pts || skillPoints();
+  const def = SKILLS[name];
+  if (!def) return 0;
+  return Math.min(def.max, Math.floor((pts[name] || 0) / def.per));
+}
+function skillVal(name) {
+  const def = SKILLS[name];
+  return def ? def.val(skillLevel(name)) : 0;
+}
+
+// ---- 装備の派生値（武器＋スキル）----
 function getAtk() {
-  return (weaponById(player.weapon) || WEAPONS[0]).atk;
+  return (weaponById(player.weapon) || WEAPONS[0]).atk + skillVal("攻撃");
+}
+function getMaxHp() {
+  return player.maxHp + skillVal("体力増強");
+}
+function getJustWindow() {
+  return JUST_WINDOW + skillVal("回避性能");
 }
 // 装備中の武器がそのモンスターに与える属性ダメージと、弱点を突いたか
 function elementalHit(monster) {
@@ -181,7 +215,7 @@ function elementalHit(monster) {
   return { dmg: Math.round(w.ele * mult), weak, element: w.element };
 }
 function getDef() {
-  let d = 0;
+  let d = skillVal("防御");
   for (const slot of SLOTS) {
     const id = player.armor[slot];
     if (id) d += (armorById(id)?.def || 0);
@@ -548,7 +582,7 @@ function completeQuest(q) {
   let hpTxt = "";
   if (q.reward.maxHp && !player.questsDone[q.id]) {
     player.maxHp += q.reward.maxHp;
-    player.hp = player.maxHp;
+    player.hp = getMaxHp();
     hpTxt = `\n最大HP +${q.reward.maxHp}！`;
   }
   player.questsDone[q.id] = true;
@@ -721,6 +755,13 @@ function gearCard(item, kind) {
     `<div class="gear-stat">${stat}</div>`;
   card.appendChild(top);
 
+  if (kind === "armor" && item.skills) {
+    const sk = document.createElement("div");
+    sk.className = "gear-skill";
+    sk.textContent = "スキル " + Object.entries(item.skills).map(([s, p]) => `${s}+${p}`).join("　");
+    card.appendChild(sk);
+  }
+
   if (!owned) {
     const cost = document.createElement("div");
     cost.className = "gear-cost";
@@ -766,14 +807,33 @@ function craftItem(item, kind) {
 function equipItem(item, kind, silent) {
   if (kind === "weapon") player.weapon = item.id;
   else player.armor[item.slot] = item.id;
+  player.hp = Math.min(player.hp, getMaxHp()); // 体力増強が下がった場合にクランプ
   updateHud();
   save();
   renderEquip();
   if (!silent) showToast(`${item.name} を装備した`);
 }
 
+function activeSkillsCard() {
+  const pts = skillPoints();
+  const wrap = document.createElement("div");
+  wrap.className = "skills-summary";
+  const names = Object.keys(SKILLS).filter((s) => skillLevel(s, pts) > 0);
+  if (names.length === 0) {
+    wrap.innerHTML = `<div class="skills-title">発動スキル</div><div class="skills-none">なし（防具を装備するとスキルが発動）</div>`;
+    return wrap;
+  }
+  const rows = names.map((s) => {
+    const lv = skillLevel(s, pts);
+    return `<div class="skill-row"><span>${s} Lv${lv}</span><span class="skill-eff">${SKILLS[s].desc(lv)}</span></div>`;
+  }).join("");
+  wrap.innerHTML = `<div class="skills-title">発動スキル</div>${rows}`;
+  return wrap;
+}
+
 function renderEquip() {
   el.equipBody.innerHTML = "";
+  el.equipBody.appendChild(activeSkillsCard());
 
   if (equipTab === "weapon") {
     for (const w of WEAPONS) el.equipBody.appendChild(gearCard(w, "weapon"));
@@ -987,7 +1047,7 @@ function scheduleMonsterAttack() {
 
 function resolveMonsterHit() {
   const sinceDodge = performance.now() - battle.dodgePressedAt;
-  if (battle.dodging && sinceDodge <= JUST_WINDOW) {
+  if (battle.dodging && sinceDodge <= getJustWindow()) {
     // ジャスト回避！ → 反撃チャンス
     battle.counterReady = true;
     el.battleLog.textContent = "⚡ ジャスト回避！ 反撃チャンス！";
@@ -1026,6 +1086,10 @@ el.attackBtn.addEventListener("click", () => {
     head = "会心！ ";
     crit = true;
     hideWeak();
+  } else if (Math.random() * 100 < skillVal("会心")) { // 会心スキル発動
+    phys = Math.round(phys * CRIT_MULT);
+    head = "会心！ ";
+    crit = true;
   }
 
   // 属性ダメージ（弱点属性なら大きく加算）
@@ -1109,7 +1173,7 @@ function monsterDown() {
 
 function playerDown() {
   endBattle();
-  player.hp = player.maxHp; // 力尽きたら全回復してキャンプに帰還
+  player.hp = getMaxHp(); // 力尽きたら全回復してキャンプに帰還
   updateHud();
   save();
   showToast("💤 力尽きた…\nキャンプで回復した");
@@ -1130,7 +1194,7 @@ function endBattle() {
 
 function updateBattleBars() {
   el.monsterHp.style.width = (battle.hp / battle.monster.maxHp) * 100 + "%";
-  el.battlePlayerHp.style.width = (player.hp / player.maxHp) * 100 + "%";
+  el.battlePlayerHp.style.width = (player.hp / getMaxHp()) * 100 + "%";
 }
 
 // ============================================================
@@ -1141,7 +1205,7 @@ function updateHud() {
   el.defVal.textContent = getDef();
   el.materials.textContent = totalMats();
   el.kills.textContent = player.kills;
-  el.playerHpText.textContent = `${player.hp}/${player.maxHp}`;
+  el.playerHpText.textContent = `${player.hp}/${getMaxHp()}`;
   el.areaEmoji.textContent = currentArea.emoji;
   el.areaName.textContent = currentArea.name;
   updateQuestBanner();
