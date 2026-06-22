@@ -388,7 +388,8 @@ html, body {
 
 #hunter-emoji.just { animation: shake 0.25s; filter: drop-shadow(0 0 16px #4db8a4); }
 
-#monster-name { font-weight: 700; margin: 10px 0 6px; }
+#monster-name { font-weight: 700; margin: 10px 0 2px; }
+#monster-weak { font-size: 13px; color: rgba(238,242,247,0.75); margin-bottom: 6px; }
 #monster-telegraph {
   margin-top: 10px;
   color: var(--danger);
