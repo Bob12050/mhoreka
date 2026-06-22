@@ -33,6 +33,25 @@ const MONSTER_TYPES = [
 ];
 const typeByName = (n) => MONSTER_TYPES.find((t) => t.name === n);
 
+// ---- 亜種（強化変異個体）----
+const RARE_MAT = "竜の宝玉";          // 亜種が落とすレア素材
+const VARIANT_CHANCE = 0.16;          // 出現抽選
+const VARIANT_MIN_KILLS = 9;          // 旧ジャングル解放後から出現
+const VARIANT_WEAK_SHIFT = { 火: "水", 水: "火", 雷: "龍", 龍: "雷" };
+function toVariant(t) {
+  return {
+    ...t,
+    variant: true,
+    name: "亜種 " + t.name,
+    baseName: t.name,
+    hp: Math.round(t.hp * 1.7),
+    atk: Math.round(t.atk * 1.35),
+    mats: t.mats + 2,
+    weak: VARIANT_WEAK_SHIFT[t.weak] || t.weak, // 弱点が変化
+    resist: t.weak,                              // 元の弱点が耐性に
+  };
+}
+
 // ---- 属性 ----
 const ELE_ICON = { 火: "🔥", 水: "💧", 雷: "⚡", 龍: "🐲" };
 const eleIcon = (e) => ELE_ICON[e] || "";
@@ -56,6 +75,8 @@ const WEAPONS = [
   { id: "w_diablos_hammer",name:"角竜の鎚",   type: "ハンマー",atk: 54, ele: 0,  element: "無", cost: { "角竜の甲殻": 5, "火竜の鱗": 3 } },
   { id: "w_kushala_gs", name: "鋼龍剣",       type: "大剣",   atk: 58, ele: 20, element: "龍", cost: { "鋼龍の翼": 4, "火竜の鱗": 3 } },
   { id: "w_elder_hammer",name:"古龍棍",       type: "ハンマー",atk: 70, ele: 24, element: "龍", cost: { "古龍の血": 2, "鋼龍の翼": 3 } },
+  // 最上位（亜種のレア素材が必要）
+  { id: "w_relic_db",   name: "覇玉の双剣",   type: "双剣",   atk: 82, ele: 28, element: "龍", cost: { "竜の宝玉": 3, "古龍の血": 2 } },
 ];
 const SLOTS = ["頭", "胴", "腕", "腰", "脚"];
 const ARMORS = [
@@ -77,6 +98,10 @@ const ARMORS = [
   { id: "a_rath_arm",  name: "リオソウル【腕】", slot: "腕", def: 8, cost: { "火竜の鱗": 3 } },
   { id: "a_rath_waist",name: "リオソウル【帯】", slot: "腰", def: 8, cost: { "角竜の甲殻": 3 } },
   { id: "a_rath_leg",  name: "リオソウル【脚】", slot: "脚", def: 8, cost: { "火竜の鱗": 3, "角竜の甲殻": 1 } },
+  // 覇玉装備（最上位・亜種のレア素材が必要）
+  { id: "a_relic_head", name: "覇玉ノ兜", slot: "頭", def: 12, cost: { "竜の宝玉": 2 } },
+  { id: "a_relic_body", name: "覇玉ノ鎧", slot: "胴", def: 14, cost: { "竜の宝玉": 2, "古龍の血": 2 } },
+  { id: "a_relic_leg",  name: "覇玉ノ脚", slot: "脚", def: 12, cost: { "竜の宝玉": 2 } },
 ];
 const weaponById = (id) => WEAPONS.find((w) => w.id === id);
 const armorById = (id) => ARMORS.find((a) => a.id === id);
@@ -110,8 +135,13 @@ const QUESTS = [
   { id: "q9",  name: "角竜の暴威",     target: "ディアブロス",   count: 1, reward: { mats: { "角竜の甲殻": 4 } } },
   { id: "q10", name: "鋼の龍を討て",   target: "クシャルダオラ", count: 1, reward: { mats: { "鋼龍の翼": 3 }, maxHp: 25 } },
   { id: "q11", name: "伝説の古龍",     target: "古龍",           count: 1, reward: { mats: { "古龍の血": 3 }, maxHp: 30 } },
+  // 亜種クエスト（レア素材が狙える）
+  { id: "qv1", name: "蒼炎の悪魔",     target: "亜種 リオレウス", count: 1, reward: { mats: { "竜の宝玉": 1 } } },
+  { id: "qv2", name: "黒き宝玉",       target: "亜種 古龍",       count: 1, reward: { mats: { "竜の宝玉": 2 }, maxHp: 30 } },
 ];
 const questById = (id) => QUESTS.find((q) => q.id === id);
+const questBase = (q) => (q.target.startsWith("亜種 ") ? q.target.slice(3) : q.target);
+const questEmoji = (q) => { const t = typeByName(questBase(q)); return t ? t.emoji : "❓"; };
 
 // ---- 戦闘バランス ----
 const DODGE_INVULN = 600;   // 回避の無敵時間(ms)
@@ -282,7 +312,11 @@ resize();
 // ---- モンスター生成 ----
 function spawnMonster() {
   const pool = currentArea.pool;
-  const t = typeByName(pool[Math.floor(Math.random() * pool.length)]);
+  let t = typeByName(pool[Math.floor(Math.random() * pool.length)]);
+  // 一定の進行度から、たまに亜種が出現
+  if (player.kills >= VARIANT_MIN_KILLS && Math.random() < VARIANT_CHANCE) {
+    t = toVariant(t);
+  }
   const angle = Math.random() * Math.PI * 2;
   const dist = MONSTER_MIN_DIST + Math.random() * MONSTER_SPREAD;
   return {
@@ -497,10 +531,13 @@ function travelTo(a) {
 // ============================================================
 //  クエスト
 // ============================================================
-const questAvailable = (q) => {
-  const a = monsterArea(q.target);
-  return a && areaUnlocked(a);
-};
+function questAvailable(q) {
+  const a = monsterArea(questBase(q));
+  if (!a || !areaUnlocked(a)) return false;
+  // 亜種クエストは亜種が出現する進行度から
+  if (q.target.startsWith("亜種 ") && player.kills < VARIANT_MIN_KILLS) return false;
+  return true;
+}
 
 function completeQuest(q) {
   let rewardTxt = "";
@@ -558,7 +595,6 @@ function rewardText(q) {
 function renderQuests() {
   el.questBody.innerHTML = "";
   for (const q of QUESTS) {
-    const t = typeByName(q.target);
     const isActive = player.questActive === q.id;
     const avail = questAvailable(q);
     const done = !!player.questsDone[q.id];
@@ -575,7 +611,7 @@ function renderQuests() {
 
     const tgt = document.createElement("div");
     tgt.className = "quest-target";
-    tgt.textContent = `${t.emoji} ${q.target} を ${q.count}頭討伐`;
+    tgt.textContent = `${questEmoji(q)} ${q.target} を ${q.count}頭討伐`;
     card.appendChild(tgt);
 
     const rew = document.createElement("div");
@@ -616,8 +652,7 @@ function renderQuests() {
 function updateQuestBanner() {
   if (player.questActive) {
     const q = questById(player.questActive);
-    const t = typeByName(q.target);
-    el.questBanner.textContent = `📜 ${t.emoji}${q.target} ${player.questProgress}/${q.count}`;
+    el.questBanner.textContent = `📜 ${questEmoji(q)}${q.target} ${player.questProgress}/${q.count}`;
     el.questBanner.classList.remove("hidden");
   } else {
     el.questBanner.classList.add("hidden");
@@ -852,11 +887,15 @@ function render() {
     const mx = cx + (m.x - player.x);
     const my = cy + (m.y - player.y) + Math.sin(t + m.bob) * 4;
     if (mx < -60 || mx > W + 60 || my < -60 || my > H + 60) continue;
-    // 索敵リング
-    ctx.strokeStyle = "rgba(224,90,74,0.25)";
+    // 索敵リング（亜種は金色）
+    ctx.strokeStyle = m.variant ? "rgba(255,210,80,0.7)" : "rgba(224,90,74,0.25)";
     ctx.beginPath(); ctx.arc(mx, my, 30, 0, Math.PI * 2); ctx.stroke();
     ctx.font = "40px serif";
     ctx.fillText(m.emoji, mx, my);
+    if (m.variant) {
+      ctx.font = "20px serif";
+      ctx.fillText("✨", mx + 22, my - 20);
+    }
   }
 
   // プレイヤー（常に中央）
@@ -1032,6 +1071,8 @@ function monsterDown() {
   player.kills++;
   // 素材ドロップ（モンスター固有）
   player.mats[mon.material] = (player.mats[mon.material] || 0) + mon.mats;
+  // 亜種はレア素材を追加ドロップ
+  if (mon.variant) player.mats[RARE_MAT] = (player.mats[RARE_MAT] || 0) + 1;
   // 図鑑に記録（初討伐かどうか判定）
   const firstKill = !player.bestiary[mon.name];
   player.bestiary[mon.name] = (player.bestiary[mon.name] || 0) + 1;
@@ -1056,6 +1097,8 @@ function monsterDown() {
     showToast(questMsg);
   } else if (newArea) {
     showToast(`🗺️ 新エリア解放！\n${newArea.emoji} ${newArea.name} へ行けるように`);
+  } else if (mon.variant) {
+    showToast(`✨ 亜種を討伐！\n${mon.material}×${mon.mats}　${RARE_MAT}×1`);
   } else if (firstKill) {
     showToast(`✨ 新種発見！\n${mon.emoji} ${mon.name} を図鑑に登録`);
   } else {
