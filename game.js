@@ -42,7 +42,7 @@ function toVariant(t) {
   return {
     ...t,
     variant: true,
-    name: "亜種 " + t.name,
+    name: t.name + "亜種",
     baseName: t.name,
     hp: Math.round(t.hp * 1.7),
     atk: Math.round(t.atk * 1.35),
@@ -136,11 +136,11 @@ const QUESTS = [
   { id: "q10", name: "鋼の龍を討て",   target: "クシャルダオラ", count: 1, reward: { mats: { "鋼龍の翼": 3 }, maxHp: 25 } },
   { id: "q11", name: "伝説の古龍",     target: "古龍",           count: 1, reward: { mats: { "古龍の血": 3 }, maxHp: 30 } },
   // 亜種クエスト（レア素材が狙える）
-  { id: "qv1", name: "蒼炎の悪魔",     target: "亜種 リオレウス", count: 1, reward: { mats: { "竜の宝玉": 1 } } },
-  { id: "qv2", name: "黒き宝玉",       target: "亜種 古龍",       count: 1, reward: { mats: { "竜の宝玉": 2 }, maxHp: 30 } },
+  { id: "qv1", name: "蒼炎の悪魔",     target: "リオレウス亜種", count: 1, reward: { mats: { "竜の宝玉": 1 } } },
+  { id: "qv2", name: "黒き宝玉",       target: "古龍亜種",       count: 1, reward: { mats: { "竜の宝玉": 2 }, maxHp: 30 } },
 ];
 const questById = (id) => QUESTS.find((q) => q.id === id);
-const questBase = (q) => (q.target.startsWith("亜種 ") ? q.target.slice(3) : q.target);
+const questBase = (q) => (q.target.endsWith("亜種") ? q.target.slice(0, -2) : q.target);
 const questEmoji = (q) => { const t = typeByName(questBase(q)); return t ? t.emoji : "❓"; };
 
 // ---- 戦闘バランス ----
@@ -535,7 +535,7 @@ function questAvailable(q) {
   const a = monsterArea(questBase(q));
   if (!a || !areaUnlocked(a)) return false;
   // 亜種クエストは亜種が出現する進行度から
-  if (q.target.startsWith("亜種 ") && player.kills < VARIANT_MIN_KILLS) return false;
+  if (q.target.endsWith("亜種") && player.kills < VARIANT_MIN_KILLS) return false;
   return true;
 }
 
